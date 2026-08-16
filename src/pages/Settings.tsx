@@ -32,6 +32,7 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { migrateCustomerLoyaltyCounts, MigrationResult } from '@/lib/loyalty-migrations';
+import { migrateFirestoreToSupabase } from '@/lib/migration';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, getDocs, writeBatch, Timestamp, setDoc, deleteField, getDoc, increment, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Category, Supplier, UserProfile, Location, Invite, AuditLog, Customer, Product, PromoCode, PaymentOption, Sale } from '@/types';
@@ -122,11 +123,30 @@ export const Settings: React.FC = () => {
   const [isBackingUp, setIsBackingUp] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isReconciling, setIsReconciling] = useState(false);
+  const [isMigratingSupabase, setIsMigratingSupabase] = useState(false);
   const [backupProgress, setBackupProgress] = useState('');
   const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [restoreFile, setRestoreFile] = useState<File | null>(null);
   const [restoreConfirmText, setRestoreConfirmText] = useState('');
   const [restoreOption, setRestoreOption] = useState<'merge' | 'replace'>('merge');
+
+  const handleMigrateToSupabase = async () => {
+    setIsMigratingSupabase(true);
+    try {
+      toast.info('Starting sync to Supabase PostgreSQL...');
+      const res = await migrateFirestoreToSupabase();
+      if (res.success) {
+        toast.success('Successfully synced Firestore data to Supabase!');
+      } else {
+        toast.warning(`Sync finished with some issues. Migrated tables: ${Object.keys(res.counts).length}`);
+      }
+    } catch (err: any) {
+      console.error('Supabase migration error:', err);
+      toast.error('Migration failed: ' + (err.message || 'Check your Supabase URL & Anon Key'));
+    } finally {
+      setIsMigratingSupabase(false);
+    }
+  };
 
   const handleManualReconcile = async () => {
     setIsReconciling(true);
@@ -1949,11 +1969,22 @@ export const Settings: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={handleManualReconcile}
-                      disabled={isBackingUp || isRestoring || isReconciling}
+                      disabled={isBackingUp || isRestoring || isReconciling || isMigratingSupabase}
                       className="gap-2 font-semibold shadow-sm text-slate-700 hover:text-slate-800 hover:bg-slate-100 border-slate-200"
                     >
                       <RefreshCw className={cn("w-4 h-4", isReconciling && "animate-spin")} />
                       {isReconciling ? 'Reconciling Data...' : 'Reconcile Data'}
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleMigrateToSupabase}
+                      disabled={isBackingUp || isRestoring || isReconciling || isMigratingSupabase}
+                      className="gap-2 font-semibold shadow-sm text-sky-700 hover:text-sky-800 hover:bg-sky-50 border-sky-200"
+                    >
+                      <RefreshCw className={cn("w-4 h-4", isMigratingSupabase && "animate-spin")} />
+                      {isMigratingSupabase ? 'Syncing to Supabase...' : 'Sync Firestore to Supabase'}
                     </Button>
                   </div>
                 </div>
