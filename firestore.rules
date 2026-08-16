@@ -1,0 +1,161 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (request.auth.token.email != null && request.auth.token.email in ['v4peavenue@gmail.com', 'vanhuxley24@gmail.com', 'dutchlordsilvertongue24@gmail.com']) ||
+        ('role' in request.auth.token && request.auth.token.role == 'admin') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin')
+      );
+    }
+
+    function isManager() {
+      return isSignedIn() && (
+        isAdmin() ||
+        ('role' in request.auth.token && request.auth.token.role == 'manager') ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'manager')
+      );
+    }
+
+    match /test/{testId} {
+      allow read, write: if true;
+    }
+
+    // User profiles & account ownership
+    match /users/{userId} {
+      allow read, create, update: if isSignedIn();
+      allow delete: if isAdmin();
+    }
+
+    // Inventory Products
+    match /products/{productId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Sales transactions
+    match /sales/{saleId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Attendance logs
+    match /attendance/{attendanceId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Leave & Schedule Requests
+    match /attendanceRequests/{requestId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Staff Schedules
+    match /schedules/{scheduleId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Audit logs
+    match /audit_logs/{logId} {
+      allow read, create: if isSignedIn();
+      allow update, delete: if isAdmin() || isManager();
+    }
+
+    // Purchase orders
+    match /purchaseOrders/{poId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Stock Adjustments
+    match /stockAdjustments/{adjId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Return Transactions
+    match /returnTransactions/{returnId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Financial Transactions
+    match /financialTransactions/{transId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Suppliers
+    match /suppliers/{supplierId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Categories
+    match /categories/{categoryId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Brands
+    match /brands/{brandId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Business Locations
+    match /locations/{locationId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Loyalty Cards
+    match /loyaltyCards/{cardId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // System Invites
+    match /invites/{inviteId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Price Tiers
+    match /priceTiers/{tierId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Promos
+    match /promos/{promoId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Payment Options
+    match /paymentOptions/{optionId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Financial Accounts
+    match /accounts/{accountId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // System Settings
+    match /settings/{settingId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Staff Rates
+    match /staffRates/{staffId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

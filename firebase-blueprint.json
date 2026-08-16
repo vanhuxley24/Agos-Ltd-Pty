@@ -1,0 +1,420 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A product in the inventory",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product name" },
+        "sku": { "type": "string", "description": "Stock Keeping Unit" },
+        "category": { "type": "string", "description": "Category name" },
+        "price": { "type": "number", "description": "Selling price" },
+        "cost": { "type": "number", "description": "Purchase cost" },
+        "stock": { "type": "number", "description": "Current stock quantity" },
+        "lowStockThreshold": { "type": "number", "description": "Threshold for low stock alerts" },
+        "imageUrl": { "type": "string", "description": "URL of the product image" },
+        "supplierId": { "type": "string", "description": "Reference to supplier" },
+        "locationIds": { "type": "array", "items": { "type": "string" } },
+        "stocks": { "type": "object", "description": "Map of locationId to stock quantity" },
+        "tierPrices": { "type": "object", "description": "Map of priceTierId to specific price" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "sku", "price", "stock"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "A sales transaction",
+      "type": "object",
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" },
+              "subtotal": { "type": "number" }
+            }
+          }
+        },
+        "total": { "type": "number" },
+        "tax": { "type": "number" },
+        "discount": { "type": "number" },
+        "paymentMethod": { "type": "string", "enum": ["cash", "card", "e-wallet", "pending"] },
+        "status": { "type": "string", "enum": ["completed", "returned", "pending"] },
+        "staffId": { "type": "string" },
+        "locationId": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerDetails": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["items", "total", "paymentMethod", "status", "timestamp", "locationId", "customerId", "customerDetails"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "Customer information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "billingAddress": { "type": "string" },
+        "shippingAddress": { "type": "string" },
+        "municipality": { "type": "string" },
+        "city": { "type": "string" },
+        "country": { "type": "string" },
+        "zip": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "priceTierId": { "type": "string", "description": "Assigned price tier ID" },
+        "loyaltyCardNumber": { "type": "string", "description": "Unique assigned loyalty card number or barcode" },
+        "loyaltyCardQr": { "type": "string", "description": "Loyalty QR code payload string" },
+        "totalItemsPurchased": { "type": "number", "description": "Total items purchased by customer over time" },
+        "loyaltyItemCount": { "type": "number", "description": "Current item count in the 10-item loyalty cycle (0-9)" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "billingAddress", "shippingAddress", "municipality", "city", "country", "zip", "createdAt"]
+    },
+    "LoyaltyCard": {
+      "title": "LoyaltyCard",
+      "description": "Physical or digital loyalty card with number/QR code assigned to a customer",
+      "type": "object",
+      "properties": {
+        "cardNumber": { "type": "string" },
+        "qrCode": { "type": "string" },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "issuedAt": { "type": "string" },
+        "status": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["cardNumber", "status"]
+    },
+    "PriceTier": {
+      "title": "PriceTier",
+      "description": "A pricing tier for customers",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "PromoCode": {
+      "title": "PromoCode",
+      "description": "A promotional discount code",
+      "type": "object",
+      "properties": {
+        "code": { "type": "string" },
+        "amount": { "type": "number" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "isPermanent": { "type": "boolean" },
+        "isActive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["code", "amount", "isPermanent", "isActive", "createdAt"]
+    },
+    "PaymentOption": {
+      "title": "PaymentOption",
+      "description": "A configured payment method",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["bank", "ewallet", "cash", "card"] },
+        "active": { "type": "boolean" }
+      },
+      "required": ["name", "type", "active"]
+    },
+    "Supplier": {
+      "title": "Supplier",
+      "description": "Product supplier information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "contact": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "address": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "Product category",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Brand": {
+      "title": "Brand",
+      "description": "Product brand",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Location": {
+      "title": "Location",
+      "description": "Business branch or warehouse location",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "addressLine1": { "type": "string" },
+        "addressLine2": { "type": "string" },
+        "municipality": { "type": "string" },
+        "city": { "type": "string" },
+        "country": { "type": "string" },
+        "isWarehouse": { "type": "boolean" }
+      },
+      "required": ["name", "addressLine1", "addressLine2", "municipality", "city", "country"]
+    },
+    "User": {
+      "title": "User",
+      "description": "System user profile",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "manager", "staff"] }
+      },
+      "required": ["email", "role"]
+    },
+    "Invite": {
+      "title": "Invite",
+      "description": "User invitation to the system",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["admin", "manager", "staff"] },
+        "status": { "type": "string", "enum": ["pending", "accepted", "expired"] },
+        "invitedBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["email", "role", "status", "createdAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Record of user actions for auditing",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "action": { "type": "string" },
+        "details": { "type": "string" },
+        "entityId": { "type": "string" },
+        "entityType": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "userName", "userEmail", "action", "details", "timestamp"]
+    },
+    "PurchaseOrder": {
+      "title": "PurchaseOrder",
+      "description": "A purchase order for stock replenishment",
+      "type": "object",
+      "properties": {
+        "poNumber": { "type": "string" },
+        "supplierId": { "type": "string" },
+        "supplierName": { "type": "string" },
+        "locationId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "sku": { "type": "string" },
+              "quantity": { "type": "number" },
+              "cost": { "type": "number" },
+              "receivedQuantity": { "type": "number" }
+            }
+          }
+        },
+        "totalAmount": { "type": "number" },
+        "status": { "type": "string", "enum": ["draft", "ordered", "received", "cancelled"] },
+        "paymentMethod": { "type": "string", "enum": ["cash", "card", "bank", "ewallet"] },
+        "notes": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "orderedAt": { "type": "string", "format": "date-time" },
+        "receivedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["poNumber", "supplierId", "locationId", "items", "totalAmount", "status", "createdAt"]
+    },
+    "StockAdjustment": {
+      "title": "StockAdjustment",
+      "description": "A manual adjustment of stock levels",
+      "type": "object",
+      "properties": {
+        "productId": { "type": "string" },
+        "productName": { "type": "string" },
+        "locationId": { "type": "string" },
+        "locationName": { "type": "string" },
+        "previousStock": { "type": "number" },
+        "adjustmentQuantity": { "type": "number" },
+        "newStock": { "type": "number" },
+        "type": { "type": "string", "enum": ["add", "subtract", "set"] },
+        "reason": { "type": "string" },
+        "adjustedBy": { "type": "string" },
+        "adjustedByName": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["productId", "locationId", "type", "quantity", "reason", "timestamp"]
+    },
+    "ReturnTransaction": {
+      "title": "ReturnTransaction",
+      "description": "A record of returned or replaced items",
+      "type": "object",
+      "properties": {
+        "originalSaleId": { "type": "string" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "quantity": { "type": "number" },
+              "price": { "type": "number" },
+              "returnType": { "type": "string", "enum": ["return", "replacement"] },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "totalRefund": { "type": "number" },
+        "refundMethod": { "type": "string", "enum": ["cash", "card", "bank", "ewallet"] },
+        "staffId": { "type": "string" },
+        "staffName": { "type": "string" },
+        "locationId": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "reason": { "type": "string", "description": "Overall reason for the return" }
+      },
+      "required": ["originalSaleId", "items", "totalRefund", "staffId", "locationId", "timestamp"]
+    },
+    "FinancialAccount": {
+      "title": "FinancialAccount",
+      "description": "A financial account (Bank, E-wallet, etc.) to track money",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string", "enum": ["bank", "ewallet", "cash", "card"] },
+        "balance": { "type": "number" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "type", "balance", "lastUpdated"]
+    },
+    "FinancialTransaction": {
+      "title": "FinancialTransaction",
+      "description": "A manual financial transaction (expense, etc.)",
+      "type": "object",
+      "properties": {
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "accountId": { "type": "string" },
+        "accountName": { "type": "string" },
+        "locationId": { "type": "string" },
+        "locationName": { "type": "string" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "createdBy": { "type": "string" },
+        "createdByName": { "type": "string" }
+      },
+      "required": ["amount", "type", "accountId", "accountName", "category", "timestamp", "createdBy"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "Global system configurations",
+      "type": "object",
+      "properties": {
+        "currency": { "type": "string", "description": "Currency symbol or code (e.g., ₱, $)" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["currency"]
+    },
+    "Schedule": {
+      "title": "Schedule",
+      "description": "A working schedule for a user on a specific date",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "date": { "type": "string", "description": "YYYY-MM-DD" },
+        "startTime": { "type": "string", "description": "HH:mm format" },
+        "endTime": { "type": "string", "description": "HH:mm format" },
+        "locationId": { "type": "string" },
+        "isDayOff": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "User time in and time out records",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "date": { "type": "string", "description": "YYYY-MM-DD" },
+        "timeIn": { "type": "string", "format": "date-time" },
+        "timeOut": { "type": "string", "format": "date-time" },
+        "locationId": { "type": "string" },
+        "locationName": { "type": "string" },
+        "notes": { "type": "string" }
+      },
+      "required": ["userId", "date", "timeIn"]
+    },
+    "AttendanceRequest": {
+      "title": "AttendanceRequest",
+      "description": "Staff requests for leave or schedule changes",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "type": { "type": "string", "enum": ["leave", "schedule_change"] },
+        "status": { "type": "string", "enum": ["pending", "approved", "rejected"] },
+        "startDate": { "type": "string", "description": "YYYY-MM-DD" },
+        "endDate": { "type": "string", "description": "YYYY-MM-DD (optional for schedule change)" },
+        "newStartTime": { "type": "string", "description": "HH:mm (only for schedule_change)" },
+        "newEndTime": { "type": "string", "description": "HH:mm (only for schedule_change)" },
+        "reason": { "type": "string" },
+        "locationId": { "type": "string" },
+        "reviewedBy": { "type": "string" },
+        "reviewedByName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "reviewedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "type", "status", "startDate", "reason", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": { "schema": "Product", "description": "Inventory products" },
+    "/sales/{saleId}": { "schema": "Sale", "description": "Sales transactions" },
+    "/suppliers/{supplierId}": { "schema": "Supplier", "description": "Product suppliers" },
+    "/categories/{categoryId}": { "schema": "Category", "description": "Product categories" },
+    "/brands/{brandId}": { "schema": "Brand", "description": "Product brands" },
+    "/locations/{locationId}": { "schema": "Location", "description": "Business locations" },
+    "/customers/{customerId}": { "schema": "Customer", "description": "Customer records" },
+    "/users/{userId}": { "schema": "User", "description": "User profiles and roles" },
+    "/invites/{inviteId}": { "schema": "Invite", "description": "User invitations" },
+    "/audit_logs/{logId}": { "schema": "AuditLog", "description": "Audit trail records" },
+    "/purchaseOrders/{poId}": { "schema": "PurchaseOrder", "description": "Purchase orders for stock" },
+    "/stockAdjustments/{adjId}": { "schema": "StockAdjustment", "description": "Manual stock adjustments" },
+    "/returnTransactions/{returnId}": { "schema": "ReturnTransaction", "description": "Returns and replacements records" },
+    "/priceTiers/{tierId}": { "schema": "PriceTier", "description": "Customer pricing tiers" },
+    "/promos/{promoId}": { "schema": "PromoCode", "description": "Promotional codes" },
+    "/paymentOptions/{optionId}": { "schema": "PaymentOption", "description": "Configured payment methods" },
+    "/accounts/{accountId}": { "schema": "FinancialAccount", "description": "Financial accounts tracking money balances" },
+    "/financialTransactions/{transId}": { "schema": "FinancialTransaction", "description": "Manual financial transactions" },
+    "/settings/global": { "schema": "SystemSettings", "description": "Global system settings" },
+    "/schedules/{scheduleId}": { "schema": "Schedule", "description": "Staff working schedules" },
+    "/attendance/{attendanceId}": { "schema": "Attendance", "description": "Staff attendance logs" },
+    "/attendanceRequests/{requestId}": { "schema": "AttendanceRequest", "description": "Staff leave and schedule change requests" }
+  }
+}

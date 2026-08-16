@@ -1,0 +1,224 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'admin') ||
+        request.auth.token.email in ['v4peavenue@gmail.com', 'vanhuxley24@gmail.com']
+      );
+    }
+
+    function isManager() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getUserData().role == 'manager')
+      );
+    }
+
+    // User profiles & account ownership
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow update: if isSignedIn() && (
+        request.auth.uid == userId || isAdmin()
+      ) && (
+        !('role' in request.resource.data) ||
+        !('role' in resource.data) ||
+        request.resource.data.role == resource.data.role ||
+        isAdmin()
+      );
+      allow delete: if isAdmin();
+    }
+
+    // Inventory Products
+    match /products/{productId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Sales transactions (Owner attribution by staffId)
+    match /sales/{saleId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.staffId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.staffId == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Attendance logs (Owner attribution by userId)
+    match /attendance/{attendanceId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Leave & Schedule Requests (Owner attribution by userId)
+    match /attendanceRequests/{requestId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin() || isManager()
+      );
+    }
+
+    // Staff Schedules (Owner attribution by userId)
+    match /schedules/{scheduleId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid || isAdmin() || isManager()
+      );
+      allow update: if isSignedIn() && (
+        resource.data.userId == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Audit logs (Owner attribution by userId)
+    match /audit_logs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Purchase orders (Owner attribution by createdBy)
+    match /purchaseOrders/{poId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.createdBy == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Stock Adjustments (Owner attribution by adjustedBy)
+    match /stockAdjustments/{adjId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.adjustedBy == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.adjustedBy == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Return Transactions (Owner attribution by staffId)
+    match /returnTransactions/{returnId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.staffId == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.staffId == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Financial Transactions (Owner attribution by createdBy)
+    match /financialTransactions/{transId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isSignedIn() && (
+        resource.data.createdBy == request.auth.uid || isAdmin() || isManager()
+      );
+      allow delete: if isAdmin() || isManager();
+    }
+
+    // Suppliers
+    match /suppliers/{supplierId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Categories
+    match /categories/{categoryId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Brands
+    match /brands/{brandId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Business Locations
+    match /locations/{locationId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Customers
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Loyalty Cards
+    match /loyaltyCards/{cardId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // System Invites
+    match /invites/{inviteId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Price Tiers
+    match /priceTiers/{tierId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Promos
+    match /promos/{promoId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Payment Options
+    match /paymentOptions/{optionId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Financial Accounts
+    match /accounts/{accountId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // System Settings
+    match /settings/{settingId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+
+    // Staff Rates
+    match /staffRates/{staffId} {
+      allow read: if isSignedIn();
+      allow create, update, delete: if isSignedIn();
+    }
+  }
+}
