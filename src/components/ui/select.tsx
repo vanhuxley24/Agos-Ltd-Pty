@@ -40,10 +40,10 @@ function SelectTrigger({
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "flex w-fit items-center justify-between gap-2 rounded-full neo-flat-sm py-2 pr-3 pl-4 text-xs sm:text-sm font-semibold text-slate-800 transition-all outline-none select-none cursor-pointer",
+        "flex w-fit items-center justify-between gap-2 rounded-lg neo-flat-sm py-2 pr-3 pl-3.5 text-xs sm:text-sm font-semibold text-slate-800 transition-all outline-none select-none cursor-pointer",
         "hover:shadow-[2px_2px_5px_#C8D3E2,-2px_-2px_5px_#FFFFFF]",
         "disabled:cursor-not-allowed disabled:opacity-50",
-        "data-[size=default]:h-10 data-[size=sm]:h-8 data-[size=sm]:px-3",
+        "data-[size=default]:h-9 data-[size=sm]:h-8 data-[size=sm]:px-2.5",
         "[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className
       )}
@@ -82,7 +82,7 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           className={cn(
-            "relative max-h-72 min-w-36 overflow-y-auto custom-scrollbar rounded-2xl neo-flat-lg p-1.5 text-slate-800 shadow-xl duration-150 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
+            "relative max-h-72 min-w-36 overflow-y-auto custom-scrollbar rounded-lg neo-flat-lg p-1 text-slate-800 shadow-xl duration-150 outline-none data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
             className
           )}
           {...props}
@@ -100,7 +100,7 @@ function SelectLabel({ className, ...props }: SelectPrimitive.GroupLabel.Props) 
   return (
     <SelectPrimitive.GroupLabel
       data-slot="select-label"
-      className={cn("px-3 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider", className)}
+      className={cn("px-2.5 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider", className)}
       {...props}
     />
   )
@@ -115,7 +115,7 @@ function SelectItem({
     <SelectPrimitive.Item
       data-slot="select-item"
       className={cn(
-        "relative flex w-full cursor-pointer items-center gap-2 rounded-xl py-2 pr-8 pl-3 text-xs sm:text-sm font-semibold text-slate-700 outline-none select-none transition-colors",
+        "relative flex w-full cursor-pointer items-center gap-2 rounded-md py-1.5 pr-8 pl-2.5 text-xs sm:text-sm font-semibold text-slate-700 outline-none select-none transition-colors",
         "data-highlighted:bg-blue-600 data-highlighted:text-white data-highlighted:shadow-md",
         "data-disabled:pointer-events-none data-disabled:opacity-40",
         className

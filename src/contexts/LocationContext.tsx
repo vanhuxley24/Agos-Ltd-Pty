@@ -54,7 +54,7 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           setLocations(supLocs);
           setLoading(false);
         }
-      }).catch(console.warn);
+      }, (err) => console.warn(err));
     }
 
     const unsubscribe = onSnapshot(collection(db, 'locations'), (snapshot) => {

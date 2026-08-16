@@ -13,7 +13,6 @@ interface AuthContextType {
   isAdmin: boolean;
   isManager: boolean;
   updateProfile: (data: Partial<UserProfile>) => Promise<void>;
-  loginOffline: (email: string, name: string, role: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -23,7 +22,6 @@ const AuthContext = createContext<AuthContextType>({
   isAdmin: false,
   isManager: false,
   updateProfile: async () => {},
-  loginOffline: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -33,93 +31,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loginOffline = async (email: string, name: string, role: string) => {
-    setLoading(true);
-    try {
-      const { signInAnonymously } = await import('firebase/auth');
-      const cred = await signInAnonymously(auth);
-      const uid = cred.user.uid;
-
-      const offlineUser = {
-        uid: uid,
-        email: email,
-        displayName: name,
-        emailVerified: true,
-        isAnonymous: true,
-        providerData: []
-      };
-
-      const offlineProfile = {
-        id: uid,
-        name: name,
-        email: email,
-        role: role,
-        createdAt: new Date().toISOString()
-      };
-
-      // Register the offline user session on the Firestore backend so security rules will approve writes/edits
-      const userDocRef = doc(db, 'users', uid);
-      await setDoc(userDocRef, {
-        email: email,
-        role: role,
-        name: name,
-        createdAt: new Date().toISOString()
-      });
-
-      localStorage.setItem('agos_offline_session', JSON.stringify({
-        user: offlineUser,
-        profile: offlineProfile
-      }));
-
-      setUser(offlineUser);
-      setProfile(offlineProfile);
-    } catch (err) {
-      console.warn("Firebase anonymous authentication failed or offline. Fallback to purely local state:", err);
-      
-      const fallbackUid = 'offline-admin-uid';
-      const offlineUser = {
-        uid: fallbackUid,
-        email: email,
-        displayName: name,
-        emailVerified: true,
-        isAnonymous: false,
-        providerData: []
-      };
-
-      const offlineProfile = {
-        id: fallbackUid,
-        name: name,
-        email: email,
-        role: role,
-        createdAt: new Date().toISOString()
-      };
-
-      localStorage.setItem('agos_offline_session', JSON.stringify({
-        user: offlineUser,
-        profile: offlineProfile
-      }));
-
-      setUser(offlineUser);
-      setProfile(offlineProfile);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const updateProfile = async (data: Partial<UserProfile>) => {
     if (!user) return;
-    
-    // Check if offline user
-    if (user.uid === 'offline-admin-uid') {
-      const updatedProfile = { ...profile, ...data } as UserProfile;
-      setProfile(updatedProfile);
-      localStorage.setItem('agos_offline_session', JSON.stringify({
-        user,
-        profile: updatedProfile
-      }));
-      toast.success('Offline profile updated locally');
-      return;
-    }
 
     try {
       const userDocRef = doc(db, 'users', user.uid);
@@ -133,20 +46,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Check if there is an offline session
-    const offlineSessionStr = localStorage.getItem('agos_offline_session');
-    if (offlineSessionStr) {
-      try {
-        const session = JSON.parse(offlineSessionStr);
-        setUser(session.user);
-        setProfile(session.profile);
-        setLoading(false);
-        return;
-      } catch (e) {
-        console.error("Error loading offline session:", e);
-      }
-    }
-
     let unsubscribeProfile: (() => void) | null = null;
 
     const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -206,7 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isManager = roleLower === 'admin' || roleLower === 'manager' || primaryAdmins.includes(userEmail);
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isManager, updateProfile, loginOffline }}>
+    <AuthContext.Provider value={{ user, profile, loading, isAdmin, isManager, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

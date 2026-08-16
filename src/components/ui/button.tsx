@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-150 outline-none select-none active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-150 outline-none select-none active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 cursor-pointer",
   {
     variants: {
       variant: {
@@ -19,14 +19,14 @@ const buttonVariants = cva(
         link: "text-blue-600 underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-9 gap-2 px-4 text-xs sm:text-sm",
-        xs: "h-6 gap-1 px-2.5 text-[11px] rounded-full [&_svg:not([class*='size-'])]:size-3",
-        sm: "h-8 gap-1.5 px-3 text-xs rounded-full [&_svg:not([class*='size-'])]:size-3.5",
-        lg: "h-11 gap-2.5 px-6 text-sm sm:text-base rounded-full [&_svg:not([class*='size-'])]:size-5",
-        icon: "size-9 rounded-full p-0 flex items-center justify-center",
-        "icon-xs": "size-6 rounded-full p-0 flex items-center justify-center [&_svg:not([class*='size-'])]:size-3",
-        "icon-sm": "size-8 rounded-full p-0 flex items-center justify-center",
-        "icon-lg": "size-11 rounded-full p-0 flex items-center justify-center [&_svg:not([class*='size-'])]:size-5",
+        default: "h-9 gap-2 px-3.5 text-xs sm:text-sm rounded-lg",
+        xs: "h-6 gap-1 px-2 text-[11px] rounded-md [&_svg:not([class*='size-'])]:size-3",
+        sm: "h-8 gap-1.5 px-2.5 text-xs rounded-md [&_svg:not([class*='size-'])]:size-3.5",
+        lg: "h-10 gap-2 px-5 text-sm sm:text-base rounded-lg [&_svg:not([class*='size-'])]:size-5",
+        icon: "size-9 rounded-lg p-0 flex items-center justify-center",
+        "icon-xs": "size-6 rounded-md p-0 flex items-center justify-center [&_svg:not([class*='size-'])]:size-3",
+        "icon-sm": "size-8 rounded-md p-0 flex items-center justify-center",
+        "icon-lg": "size-10 rounded-lg p-0 flex items-center justify-center [&_svg:not([class*='size-'])]:size-5",
       },
     },
     defaultVariants: {

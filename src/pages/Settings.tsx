@@ -866,7 +866,7 @@ export const Settings: React.FC = () => {
           email: editingUser.email || '',
           role: editingUser.role || 'staff',
           updated_at: new Date().toISOString()
-        }, { onConflict: 'id' }).then(() => {}).catch(console.warn);
+        }, { onConflict: 'id' }).then(() => {}, (err) => console.warn(err));
       }
 
       toast.success('User account updated successfully');

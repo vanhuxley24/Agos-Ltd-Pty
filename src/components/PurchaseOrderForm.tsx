@@ -187,7 +187,7 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
           total_amount: totalAmount,
           status: 'ordered',
           created_at: new Date().toISOString()
-        }]).then(() => {}).catch(console.warn);
+        }]).then(() => {}, (err) => console.warn(err));
       }
       
       toast.success('Purchase order created and items ordered');

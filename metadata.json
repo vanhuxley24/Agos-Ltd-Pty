@@ -1,5 +1,6 @@
 {
   "name": "Agos: Upgraded",
   "description": "A premium, Filipino-inspired inventory and sales management system. Agos (Flow) streamlines your business operations with elegant real-time tracking, multi-location support, and intelligent reporting.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

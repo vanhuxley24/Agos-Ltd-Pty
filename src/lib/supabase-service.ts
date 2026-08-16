@@ -33,10 +33,10 @@ export const supabaseService = {
         updated_at: new Date().toISOString()
       };
       const { data, error } = await supabase.from('products').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveProduct error:', error);
+      if (error) console.warn('Supabase saveProduct notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase product sync error:', e);
+      console.warn('Supabase product sync notice:', e);
       return null;
     }
   },
@@ -44,9 +44,10 @@ export const supabaseService = {
   async deleteProduct(id: string) {
     if (!isSupabaseConfigured()) return;
     try {
-      await supabase.from('products').delete().eq('id', id);
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) console.warn('Supabase deleteProduct notice:', error.message || error);
     } catch (e) {
-      console.warn('Supabase deleteProduct error:', e);
+      console.warn('Supabase deleteProduct notice:', e);
     }
   },
 
@@ -77,10 +78,10 @@ export const supabaseService = {
         created_at: typeof sale.createdAt === 'string' ? sale.createdAt : new Date().toISOString()
       };
       const { data, error } = await supabase.from('sales').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveSale error:', error);
+      if (error) console.warn('Supabase saveSale notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase sale sync error:', e);
+      console.warn('Supabase sale sync notice:', e);
       return null;
     }
   },
@@ -97,10 +98,10 @@ export const supabaseService = {
         is_active: location.isActive !== false
       };
       const { data, error } = await supabase.from('locations').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveLocation error:', error);
+      if (error) console.warn('Supabase saveLocation notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase location sync error:', e);
+      console.warn('Supabase location sync notice:', e);
       return null;
     }
   },
@@ -108,9 +109,10 @@ export const supabaseService = {
   async deleteLocation(id: string) {
     if (!isSupabaseConfigured()) return;
     try {
-      await supabase.from('locations').delete().eq('id', id);
+      const { error } = await supabase.from('locations').delete().eq('id', id);
+      if (error) console.warn('Supabase deleteLocation notice:', error.message || error);
     } catch (e) {
-      console.warn('Supabase deleteLocation error:', e);
+      console.warn('Supabase deleteLocation notice:', e);
     }
   },
 
@@ -127,10 +129,10 @@ export const supabaseService = {
         price_tier: customer.priceTierId || 'standard'
       };
       const { data, error } = await supabase.from('customers').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveCustomer error:', error);
+      if (error) console.warn('Supabase saveCustomer notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase customer sync error:', e);
+      console.warn('Supabase customer sync notice:', e);
       return null;
     }
   },
@@ -148,10 +150,10 @@ export const supabaseService = {
         status: card.status || 'active'
       };
       const { data, error } = await supabase.from('loyalty_cards').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveLoyaltyCard error:', error);
+      if (error) console.warn('Supabase saveLoyaltyCard notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase card sync error:', e);
+      console.warn('Supabase card sync notice:', e);
       return null;
     }
   },
@@ -171,10 +173,10 @@ export const supabaseService = {
         status: attendance.status || 'completed'
       };
       const { data, error } = await supabase.from('attendance').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveAttendance error:', error);
+      if (error) console.warn('Supabase saveAttendance notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase attendance sync error:', e);
+      console.warn('Supabase attendance sync notice:', e);
       return null;
     }
   },
@@ -196,10 +198,10 @@ export const supabaseService = {
         created_at: tx.createdAt || new Date().toISOString()
       };
       const { data, error } = await supabase.from('financial_transactions').upsert(payload, { onConflict: 'id' }).select();
-      if (error) console.error('Supabase saveFinancialTransaction error:', error);
+      if (error) console.warn('Supabase saveFinancialTransaction notice:', error.message || error);
       return data;
     } catch (e) {
-      console.warn('Supabase transaction sync error:', e);
+      console.warn('Supabase transaction sync notice:', e);
       return null;
     }
   },
@@ -219,10 +221,13 @@ export const supabaseService = {
         created_at: new Date().toISOString()
       };
       const { data, error } = await supabase.from('audit_logs').insert([payload]);
-      if (error) console.error('Supabase logAudit error:', error);
+      if (error) {
+        // Silently catch or warn if RLS policy restricts anonymous audit logs
+        console.warn('Supabase logAudit notice (RLS):', error.message || error);
+      }
       return data;
     } catch (e) {
-      console.warn('Supabase audit log error:', e);
+      console.warn('Supabase audit log notice:', e);
       return null;
     }
   }

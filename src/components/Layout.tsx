@@ -122,11 +122,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   }, []);
 
   const handleLogout = async () => {
-    localStorage.removeItem('agos_offline_session');
     try {
       await auth.signOut();
     } catch (e) {
-      console.warn("Auth signout skipped or failed during offline logout:", e);
+      console.warn("Auth signout failed:", e);
     }
     window.location.href = '/login';
   };
@@ -145,7 +144,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               {/* Left: Brand Logo */}
               <div className="flex items-center gap-3 shrink-0">
                 <Link to="/home" className="flex items-center gap-2.5 group">
-                  <div className="size-10 sm:size-11 rounded-2xl neo-flat-sm flex items-center justify-center border border-white/90 group-hover:scale-105 transition-transform shadow-sm">
+                  <div className="size-10 sm:size-11 rounded-xl neo-flat-sm flex items-center justify-center border border-white/90 group-hover:scale-105 transition-transform shadow-sm">
                     <Waves className="size-5 sm:size-6 text-blue-600 stroke-[2.5]" />
                   </div>
                   <div className="flex flex-col hidden sm:flex">
@@ -160,7 +159,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
 
               {/* Center: Neomorphic Navigation Capsule Links */}
-              <nav className="hidden lg:flex items-center gap-1.5 p-1 rounded-full neo-inset-sm">
+              <nav className="hidden lg:flex items-center gap-1.5 p-1 rounded-xl neo-inset-sm">
                 {navItems
                   .filter(item => {
                     const currentRole = isAdmin ? 'admin' : (profile?.role || 'staff');
@@ -180,7 +179,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         key={item.path}
                         to={item.path}
                         className={cn(
-                          "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold transition-all duration-200 whitespace-nowrap relative shrink-0",
+                          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-200 whitespace-nowrap relative shrink-0",
                           isActive 
                             ? "neo-flat-sm text-blue-600 font-extrabold border border-white/80" 
                             : "text-slate-500 hover:text-slate-800"
@@ -193,12 +192,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                           <span className="size-2 bg-rose-500 rounded-full animate-pulse ml-0.5 shadow-xs" />
                         )}
                         {showPendingBadge && (
-                          <span className="px-1.5 py-0.2 text-[9px] font-black bg-rose-500 text-white rounded-full shadow-xs">
+                          <span className="px-1.5 py-0.2 text-[9px] font-black bg-rose-500 text-white rounded-md shadow-xs">
                             {pendingCount}
                           </span>
                         )}
                         {showPendingRequestBadge && (
-                          <span className="px-1.5 py-0.2 text-[9px] font-black bg-rose-500 text-white rounded-full shadow-xs">
+                          <span className="px-1.5 py-0.2 text-[9px] font-black bg-rose-500 text-white rounded-md shadow-xs">
                             {pendingRequestsCount}
                           </span>
                         )}
@@ -216,7 +215,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                     onValueChange={setSelectedLocationId}
                     disabled={!isAdmin && !isManager}
                   >
-                    <SelectTrigger className="w-full neo-flat-sm h-9 rounded-full text-xs font-bold text-slate-700">
+                    <SelectTrigger className="w-full neo-flat-sm h-9 rounded-lg text-xs font-bold text-slate-700">
                       <SelectValue>
                         {selectedLocationId === 'all' ? 'All Stores' : (locations.find(l => l.id === selectedLocationId)?.name || 'Store')}
                       </SelectValue>
@@ -232,12 +231,12 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
 
                 {/* Online / Offline Sync Badge */}
                 {isOnline ? (
-                  <Badge variant="emerald" className="h-8 px-3 rounded-full text-[10px] font-extrabold flex items-center gap-1.5 shadow-xs">
+                  <Badge variant="emerald" className="h-8 px-2.5 rounded-md text-[10px] font-extrabold flex items-center gap-1.5 shadow-xs">
                     <Wifi className="size-3.5 text-emerald-600 stroke-[2.5]" />
                     <span className="hidden xl:inline">SYNCED</span>
                   </Badge>
                 ) : (
-                  <Badge variant="orange" className="h-8 px-3 rounded-full text-[10px] font-extrabold flex items-center gap-1.5 shadow-xs">
+                  <Badge variant="orange" className="h-8 px-2.5 rounded-md text-[10px] font-extrabold flex items-center gap-1.5 shadow-xs">
                     <WifiOff className="size-3.5 text-orange-600 stroke-[2.5]" />
                     <span className="hidden xl:inline">OFFLINE</span>
                   </Badge>
@@ -256,7 +255,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   <Button 
                     variant="default" 
                     size="icon-sm"
-                    className="size-9 neo-btn rounded-full text-slate-500 hover:text-rose-600"
+                    className="size-9 neo-btn rounded-lg text-slate-500 hover:text-rose-600"
                     onClick={handleLogout}
                     title="Logout"
                   >
@@ -268,14 +267,14 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               {/* Mobile Menu Trigger */}
               <div className="flex items-center gap-2 lg:hidden">
                 <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-                  <SheetTrigger render={<Button variant="default" className="neo-btn size-10 rounded-2xl p-0 flex items-center justify-center text-slate-700" />}>
+                  <SheetTrigger render={<Button variant="default" className="neo-btn size-10 rounded-lg p-0 flex items-center justify-center text-slate-700" />}>
                     <Menu className="size-5" />
                   </SheetTrigger>
                   <SheetContent side="top" className="p-0 bg-[#EBF0F6] text-slate-800 border-b border-white/60 max-h-[85vh] overflow-y-auto neo-flat-xl">
                     <div className="p-5 space-y-4">
                       <div className="flex items-center justify-between pb-3 border-b border-slate-200">
                         <div className="flex items-center gap-2.5">
-                          <div className="size-8 rounded-xl neo-flat flex items-center justify-center">
+                          <div className="size-8 rounded-lg neo-flat flex items-center justify-center">
                             <Waves className="size-4 text-blue-600 stroke-[2.5]" />
                           </div>
                           <span className="font-extrabold text-lg font-heading text-slate-800">AGOS ERP</span>
@@ -293,7 +292,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                           onValueChange={setSelectedLocationId}
                           disabled={!isAdmin && !isManager}
                         >
-                          <SelectTrigger className="w-full neo-flat h-10 rounded-2xl text-xs font-bold text-slate-800">
+                          <SelectTrigger className="w-full neo-flat h-10 rounded-lg text-xs font-bold text-slate-800">
                             <SelectValue>
                               {selectedLocationId === 'all' ? 'All Locations' : (locations.find(l => l.id === selectedLocationId)?.name || 'Select Location')}
                             </SelectValue>
@@ -326,7 +325,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                                 to={item.path}
                                 onClick={() => setIsMobileMenuOpen(false)}
                                 className={cn(
-                                  "flex items-center gap-2.5 px-4 py-3 rounded-2xl text-xs font-bold transition-all",
+                                  "flex items-center gap-2.5 px-4 py-2.5 rounded-lg text-xs font-bold transition-all",
                                   isActive 
                                     ? "neo-inset text-blue-600 font-extrabold" 
                                     : "neo-flat-sm text-slate-700 hover:text-slate-900"
@@ -345,7 +344,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                         <Button 
                           variant="destructive" 
                           size="sm"
-                          className="neo-btn-red text-xs gap-1.5 rounded-full px-4"
+                          className="neo-btn-red text-xs gap-1.5 rounded-lg px-4"
                           onClick={handleLogout}
                         >
                           <LogOut className="size-3.5" /> Logout
@@ -362,7 +361,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       )}
 
       {/* Main Page Content Container */}
-      <main className="flex-1 relative">
+      <main className="flex-1 relative flex flex-col">
         <AnimatePresence mode="wait">
           <motion.div
             key={location.pathname}
@@ -371,7 +370,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             exit={{ opacity: 0, y: -8, filter: 'blur(2px)' }}
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
-              "w-full",
+              "w-full flex-1 flex flex-col",
               !isHomePage && "p-3 sm:p-5 lg:p-7 max-w-7xl mx-auto"
             )}
           >
