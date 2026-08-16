@@ -23,6 +23,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/contexts/LocationContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { 
   Table, 
   TableBody, 
@@ -131,6 +132,7 @@ export const Inventory: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete "${product?.name}"?`)) {
       try {
         await deleteDoc(doc(db, 'products', id));
+        supabaseService.deleteProduct(id).catch(() => {});
         await logAction(profile, 'DELETE_PRODUCT', `Deleted product: ${product?.name} (SKU: ${product?.sku})`, id, 'product');
         toast.success('Product deleted');
       } catch (error) {

@@ -1,6 +1,7 @@
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './firebase';
 import { UserProfile } from '@/types';
+import { supabaseService } from './supabase-service';
 
 export const logAction = async (
   user: UserProfile | null,
@@ -14,6 +15,16 @@ export const logAction = async (
     name: 'Staff / POS System',
     email: 'pos@system.local'
   };
+
+  // Sync to Supabase
+  supabaseService.logAudit({
+    userId: activeUser.id,
+    userName: activeUser.name || 'Staff / POS System',
+    userEmail: activeUser.email || '',
+    userRole: (activeUser as any).role || 'staff',
+    action,
+    details: `${details}${entityId ? ` (Entity: ${entityId})` : ''}`
+  }).catch(() => {});
 
   try {
     await addDoc(collection(db, 'audit_logs'), {

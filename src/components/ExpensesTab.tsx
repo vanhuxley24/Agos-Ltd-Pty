@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { db } from '@/lib/firebase';
 import { collection, addDoc, updateDoc, doc, increment, Timestamp, deleteDoc, getCountFromServer, query, where } from 'firebase/firestore';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { toast } from 'sonner';
 import { FinancialAccount, Transaction } from '@/types';
 
@@ -223,6 +224,17 @@ export const ExpensesTab: React.FC<ExpensesTabProps> = ({
         transRef.id, 
         'transaction'
       );
+
+      supabaseService.saveFinancialTransaction({
+        id: transRef.id,
+        account_id: expenseAccountId,
+        type: 'expense',
+        category: expenseCategory,
+        amount: expenseAmount,
+        description: expenseDescription,
+        created_by: profile?.id || 'anonymous',
+        location_id: locationIdResolved
+      }).catch(() => {});
 
       toast.success('Expense recorded successfully!');
       

@@ -26,6 +26,7 @@ import { OperationType, handleFirestoreError } from '@/lib/firestore-utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { cn } from '@/lib/utils';
 import { Separator } from './ui/separator';
 import { MapPin, Scan } from 'lucide-react';
@@ -176,6 +177,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       if (product) {
         await updateDoc(doc(db, 'products', product.id), productData);
         await logAction(profile, 'UPDATE_PRODUCT', `Updated product: ${productData.name} (SKU: ${productData.sku})`, product.id, 'product');
+        supabaseService.saveProduct({ id: product.id, stock: product.stock, ...productData }).catch(() => {});
         toast.success('Product updated successfully');
       } else {
         const docRef = await addDoc(collection(db, 'products'), {
@@ -186,6 +188,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           createdAt: Timestamp.now()
         });
         await logAction(profile, 'CREATE_PRODUCT', `Created product: ${productData.name} (SKU: ${productData.sku})`, docRef.id, 'product');
+        supabaseService.saveProduct({ id: docRef.id, stock: 0, ...productData }).catch(() => {});
         toast.success('Product added successfully');
       }
       onClose();

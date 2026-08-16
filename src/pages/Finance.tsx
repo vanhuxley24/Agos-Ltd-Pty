@@ -38,6 +38,7 @@ import {
 import { useSettings } from '@/contexts/SettingsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/contexts/LocationContext';
+import { supabaseService } from '@/lib/supabase-service';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -284,6 +285,14 @@ export const Finance: React.FC = () => {
 
       await logAction(profile, 'CREATE_ACCOUNT', `Added financial account: ${newAccount.name} with initial balance ${newAccount.initialBalance}`, paymentRef.id, 'account');
       
+      supabaseService.saveFinancialTransaction({
+        account_id: paymentRef.id,
+        type: 'income',
+        category: 'Initial Balance',
+        amount: Number(newAccount.initialBalance),
+        description: `Initial balance for ${newAccount.name}`
+      }).catch(() => {});
+      
       toast.success('Account added successfully');
       setIsAddAccountOpen(false);
       setNewAccount({ name: '', type: 'bank', initialBalance: 0 });
@@ -429,6 +438,17 @@ export const Finance: React.FC = () => {
         transRef.id, 
         'transaction'
       );
+
+      supabaseService.saveFinancialTransaction({
+        id: transRef.id,
+        account_id: newTransaction.accountId,
+        type: newTransaction.type,
+        category: newTransaction.category,
+        amount: Number(newTransaction.amount),
+        description: newTransaction.description,
+        created_by: profile?.id || 'anonymous',
+        location_id: newTransaction.locationId || null
+      }).catch(() => {});
 
       toast.success('Transaction recorded successfully');
       setIsAddTransactionOpen(false);

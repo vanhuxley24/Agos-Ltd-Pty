@@ -25,6 +25,8 @@ import { OperationType, handleFirestoreError } from '@/lib/firestore-utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSettings } from '@/contexts/SettingsContext';
 import { logAction } from '@/lib/audit';
+import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured } from '@/lib/supabase-service';
 import { cn } from '@/lib/utils';
 import { Plus, Trash2, ShoppingBag, X } from 'lucide-react';
 import { Separator } from './ui/separator';
@@ -173,6 +175,20 @@ export const PurchaseOrderForm: React.FC<PurchaseOrderFormProps> = ({
 
       const docRef = await addDoc(collection(db, 'purchaseOrders'), poData);
       await logAction(profile, 'CREATE_PO', `Created Purchase Order: ${poData.poNumber}`, docRef.id, 'purchaseOrder');
+      
+      if (isSupabaseConfigured()) {
+        supabase.from('purchase_orders').insert([{
+          id: docRef.id,
+          po_number: poData.poNumber,
+          supplier_id: poData.supplierId,
+          supplier_name: poData.supplierName,
+          location_id: poData.locationId,
+          items: poData.items,
+          total_amount: totalAmount,
+          status: 'ordered',
+          created_at: new Date().toISOString()
+        }]).then(() => {}).catch(console.warn);
+      }
       
       toast.success('Purchase order created and items ordered');
       reset();

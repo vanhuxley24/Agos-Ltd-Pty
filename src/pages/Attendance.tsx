@@ -55,6 +55,7 @@ import { DataTablePagination } from '@/components/DataTablePagination';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/contexts/LocationContext';
 import { useSettings } from '@/contexts/SettingsContext';
+import { supabaseService } from '@/lib/supabase-service';
 import { Attendance as AttendanceType, Schedule, UserProfile, AttendanceRequest } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -771,7 +772,16 @@ export const Attendance: React.FC = () => {
         notes: ''
       };
 
-      await addDoc(collection(db, 'attendance'), attendanceData);
+      const docRef = await addDoc(collection(db, 'attendance'), attendanceData);
+      supabaseService.saveAttendance({
+        id: docRef.id,
+        userId: profile.id,
+        userName: profile.name || 'Staff',
+        locationId: selectedLocationId,
+        clockIn: new Date().toISOString(),
+        status: 'in-progress'
+      }).catch(() => {});
+
       toast.success('Successfully timed in!');
       await logAction(profile, 'TIME_IN', `Timed in at ${location?.name}`);
     } catch (error) {
@@ -789,6 +799,17 @@ export const Attendance: React.FC = () => {
         timeOut: serverTimestamp(),
         timeOutBackup: new Date().toISOString()
       });
+
+      supabaseService.saveAttendance({
+        id: currentUserAttendance.id,
+        userId: currentUserAttendance.userId,
+        userName: currentUserAttendance.userName,
+        locationId: currentUserAttendance.locationId,
+        clockIn: currentUserAttendance.timeInBackup || new Date().toISOString(),
+        clockOut: new Date().toISOString(),
+        status: 'completed'
+      }).catch(() => {});
+
       toast.success('Successfully timed out!');
       await logAction(profile, 'TIME_OUT', `Timed out from ${currentUserAttendance.locationName}`);
     } catch (error) {

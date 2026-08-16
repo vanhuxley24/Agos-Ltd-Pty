@@ -28,6 +28,7 @@ import {
   User
 } from 'lucide-react';
 import { calculateLoyaltyDiscount, processCustomerLoyaltyCheckout } from '@/lib/loyalty';
+import { supabaseService } from '@/lib/supabase-service';
 
 import { collection, onSnapshot, query, orderBy, addDoc, Timestamp, doc, updateDoc, increment, setDoc, writeBatch, limit, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -850,6 +851,10 @@ export const POS: React.FC = () => {
           createdAt: Timestamp.now()
         });
         finalCustomerId = customerRef.id;
+        supabaseService.saveCustomer({
+          id: finalCustomerId,
+          ...customerDetails
+        }).catch(() => {});
       }
 
       const checkoutTotal = isCheckoutOpen && editedTotal !== '' ? (parseFloat(editedTotal) || 0) : total;
@@ -1079,6 +1084,35 @@ export const POS: React.FC = () => {
 
       // Commit entire batch atomically
       await batch.commit();
+
+      // Mirror sale, stock changes, and financial transactions to Supabase
+      supabaseService.saveSale({ id: saleRef.id, ...saleData }).catch(() => {});
+      
+      if (!isPending && !isPromoPending && !isTotalPending) {
+        for (const split of resolvedSplits) {
+          supabaseService.saveFinancialTransaction({
+            account_id: split.methodId,
+            type: 'income',
+            category: 'Sales',
+            amount: split.amount,
+            description: `Sale Payment #${saleRef.id.substring(0, 8)}: ${customerDetails.name || 'Walk-In'}`,
+            reference_id: split.reference || saleRef.id,
+            created_by: profile?.id || 'anonymous',
+            location_id: checkoutLocationId || null
+          }).catch(() => {});
+        }
+      }
+
+      for (const item of cart) {
+        const prod = products.find(p => p.id === item.productId);
+        if (prod) {
+          const newStock = Math.max(0, (prod.stock || 0) - item.quantity);
+          supabaseService.saveProduct({
+            ...prod,
+            stock: newStock
+          }).catch(() => {});
+        }
+      }
 
       // 3. Update customer loyalty purchase count and check for card expiration/consumption
       if (finalCustomerId && finalCustomerId !== 'walk-in' && finalCustomerId !== 'new') {

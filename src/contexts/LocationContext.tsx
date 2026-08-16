@@ -3,6 +3,8 @@ import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { Location } from '../types';
 import { useAuth } from './AuthContext';
+import { supabase } from '../lib/supabase';
+import { isSupabaseConfigured } from '../lib/supabase-service';
 
 interface LocationContextType {
   locations: Location[];
@@ -32,6 +34,27 @@ export const LocationProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     if (!user) {
       setLoading(false);
       return;
+    }
+
+    // Fetch from Supabase if configured
+    if (isSupabaseConfigured()) {
+      supabase.from('locations').select('*').then(({ data, error }) => {
+        if (!error && data && data.length > 0) {
+          const supLocs: Location[] = data.map((d: any) => ({
+            id: d.id,
+            name: d.name,
+            addressLine1: d.address || '',
+            addressLine2: '',
+            municipality: '',
+            city: 'Pampanga',
+            country: 'Philippines',
+            phone: d.phone || '',
+            isActive: d.is_active !== false
+          }));
+          setLocations(supLocs);
+          setLoading(false);
+        }
+      }).catch(console.warn);
     }
 
     const unsubscribe = onSnapshot(collection(db, 'locations'), (snapshot) => {

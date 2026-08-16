@@ -25,6 +25,7 @@ import { db } from '@/lib/firebase';
 import { doc, updateDoc, collection, addDoc, Timestamp, increment, arrayUnion } from 'firebase/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { toast } from 'sonner';
 import { OperationType, handleFirestoreError } from '@/lib/firestore-utils';
 
@@ -122,6 +123,12 @@ export const StockAdjustmentForm: React.FC<StockAdjustmentFormProps> = ({
       }
 
       await updateDoc(productRef, updateData);
+
+      // Sync updated stock to Supabase
+      supabaseService.saveProduct({
+        ...selectedProduct,
+        stock: (selectedProduct.stock || 0) + adjustmentAmount
+      }).catch(() => {});
 
       // Record Adjustment
       const adjustment: Omit<StockAdjustment, 'id'> = {

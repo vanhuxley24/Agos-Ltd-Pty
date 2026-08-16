@@ -12,6 +12,7 @@ import { ArrowLeftRight } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, updateDoc, doc, increment, Timestamp } from 'firebase/firestore';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { toast } from 'sonner';
 import { FinancialAccount, Transaction } from '@/types';
 
@@ -90,6 +91,16 @@ export const TransfersTab: React.FC<TransfersTabProps> = ({ accounts, transactio
         transRef.id,
         'transaction'
       );
+
+      supabaseService.saveFinancialTransaction({
+        id: transRef.id,
+        account_id: sourceAccountId,
+        type: 'transfer',
+        category: 'Fund Transfer',
+        amount: transferAmount,
+        description: transferDescription || `Fund transfer from ${sourceAccount.name} to ${destAccount.name}`,
+        created_by: profile?.id || 'anonymous'
+      }).catch(() => {});
 
       toast.success('Funds transferred successfully!');
       

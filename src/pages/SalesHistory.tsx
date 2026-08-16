@@ -51,6 +51,7 @@ import { Sale, PriceTier, PaymentOption } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { OperationType, handleFirestoreError } from '@/lib/firestore-utils';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -598,6 +599,12 @@ export const SalesHistory: React.FC = () => {
       batch.update(saleRef, updateData);
 
       await batch.commit();
+
+      supabaseService.saveSale({
+        id: sale.id,
+        ...sale,
+        status: nextStatus
+      }).catch(() => {});
 
       await logAction(
         profile, 

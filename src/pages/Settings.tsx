@@ -33,6 +33,8 @@ import {
 } from 'lucide-react';
 import { migrateCustomerLoyaltyCounts, MigrationResult } from '@/lib/loyalty-migrations';
 import { migrateFirestoreToSupabase } from '@/lib/migration';
+import { supabase } from '@/lib/supabase';
+import { isSupabaseConfigured } from '@/lib/supabase-service';
 import { collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc, query, orderBy, limit, getDocs, writeBatch, Timestamp, setDoc, deleteField, getDoc, increment, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { Category, Supplier, UserProfile, Location, Invite, AuditLog, Customer, Product, PromoCode, PaymentOption, Sale } from '@/types';
@@ -856,6 +858,17 @@ export const Settings: React.FC = () => {
 
       await updateDoc(doc(db, 'users', editingUser.id), updateData);
       await logAction(profile, 'UPDATE_USER', `Updated user account details for ${editingUser.email}`, editingUser.id, 'user');
+      
+      if (isSupabaseConfigured()) {
+        supabase.from('users').upsert({
+          id: editingUser.id,
+          name: editingUser.name || '',
+          email: editingUser.email || '',
+          role: editingUser.role || 'staff',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' }).then(() => {}).catch(console.warn);
+      }
+
       toast.success('User account updated successfully');
       setEditingUser(null);
     } catch (error) {

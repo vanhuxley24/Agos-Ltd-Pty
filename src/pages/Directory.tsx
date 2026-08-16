@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import { OperationType, handleFirestoreError } from '@/lib/firestore-utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { logAction } from '@/lib/audit';
+import { supabaseService } from '@/lib/supabase-service';
 import { 
   Dialog, 
   DialogContent, 
@@ -384,6 +385,7 @@ export const Directory: React.FC = () => {
     try {
       const docRef = await addDoc(collection(db, 'locations'), newLocation);
       await logAction(profile, 'CREATE_LOCATION', `Created location: ${newLocation.name}`, docRef.id, 'location');
+      supabaseService.saveLocation({ id: docRef.id, ...newLocation }).catch(() => {});
       setNewLocation({ 
         name: '', 
         addressLine1: '', 
@@ -413,6 +415,7 @@ export const Directory: React.FC = () => {
         createdAt: new Date()
       });
       await logAction(profile, 'CREATE_CUSTOMER', `Created customer: ${newCustomer.name}`, docRef.id, 'customer');
+      supabaseService.saveCustomer({ id: docRef.id, ...newCustomer }).catch(() => {});
 
       // If customer was created with a loyalty card number, auto-create loyalty card doc
       if (newCustomer.loyaltyCardNumber.trim()) {
