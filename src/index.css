@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
@@ -6,8 +6,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: inherit;
-    --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-heading: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     --font-mono: "JetBrains Mono", monospace;
     
     --color-sidebar-ring: var(--sidebar-ring);
@@ -51,34 +51,34 @@
 }
 
 :root {
-    --background: #FDFCF8; /* Warm off-white */
-    --foreground: #1C2D4E; /* Agos Navy */
-    --card: #FFFFFF;
-    --card-foreground: #1C2D4E;
-    --popover: #FFFFFF;
-    --popover-foreground: #1C2D4E;
-    --primary: #1C2D4E; /* Agos Navy */
-    --primary-foreground: #FDFCF8;
-    --secondary: #F5F2ED;
-    --secondary-foreground: #D4AF37; /* Agos Gold */
-    --muted: #F5F2ED;
+    --background: #EBF0F6; /* Soft Neomorphic Canvas */
+    --foreground: #1E293B; /* Deep Slate */
+    --card: #EBF0F6;
+    --card-foreground: #1E293B;
+    --popover: #EBF0F6;
+    --popover-foreground: #1E293B;
+    --primary: #3B82F6; /* Vibrant Cobalt Blue */
+    --primary-foreground: #FFFFFF;
+    --secondary: #DFE6F0;
+    --secondary-foreground: #334155;
+    --muted: #E2E9F2;
     --muted-foreground: #64748B;
-    --accent: #FDFCF8;
-    --accent-foreground: #1C2D4E;
-    --destructive: #991B1B;
-    --border: #E5E1DA;
-    --input: #E5E1DA;
-    --ring: #1C2D4E;
-    --radius: 0.75rem;
+    --accent: #EBF0F6;
+    --accent-foreground: #1E293B;
+    --destructive: #EF4444;
+    --border: #D3DDE9;
+    --input: #D3DDE9;
+    --ring: #3B82F6;
+    --radius: 1.25rem;
     
-    --sidebar: #1C2D4E;
-    --sidebar-foreground: #FDFCF8;
-    --sidebar-primary: #D4AF37; /* Gold/Brass */
-    --sidebar-primary-foreground: #1C2D4E;
-    --sidebar-accent: rgba(255, 255, 255, 0.1);
-    --sidebar-accent-foreground: #FDFCF8;
-    --sidebar-border: rgba(255, 255, 255, 0.1);
-    --sidebar-ring: #D4AF37;
+    --sidebar: #EBF0F6;
+    --sidebar-foreground: #1E293B;
+    --sidebar-primary: #3B82F6;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #DFE6F0;
+    --sidebar-accent-foreground: #1E293B;
+    --sidebar-border: #D3DDE9;
+    --sidebar-ring: #3B82F6;
 }
 
 @layer base {
@@ -86,30 +86,175 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground antialiased font-sans;
+    background-color: #EBF0F6;
+    color: #1E293B;
+    @apply antialiased font-sans;
     font-feature-settings: "ss01", "ss02", "cv01", "cv02";
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight;
-    font-family: inherit;
+    @apply tracking-tight font-heading;
   }
 }
 
+/* =========================================================================
+   NEOMORPHIC CORE DESIGN SYSTEM (Matching Uploaded UI References)
+   ========================================================================= */
+
 @layer utilities {
-  .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+  /* Raised Soft Surfaces */
+  .neo-flat {
+    background-color: #EBF0F6;
+    box-shadow: 7px 7px 15px #C8D3E2, -7px -7px 15px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.7);
   }
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/10 hover:-translate-y-1;
+
+  .neo-flat-sm {
+    background-color: #EBF0F6;
+    box-shadow: 4px 4px 9px #C8D3E2, -4px -4px 9px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.7);
   }
+
+  .neo-flat-lg {
+    background-color: #EBF0F6;
+    box-shadow: 12px 12px 24px #C4CFDF, -12px -12px 24px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.8);
+  }
+
+  .neo-flat-xl {
+    background-color: #EBF0F6;
+    box-shadow: 16px 16px 32px #C0CCD9, -16px -16px 32px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+  }
+
+  /* Sunken / Inset / Pressed Surfaces */
+  .neo-inset {
+    background-color: #EBF0F6;
+    box-shadow: inset 4px 4px 8px #C8D3E2, inset -4px -4px 8px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .neo-inset-sm {
+    background-color: #EBF0F6;
+    box-shadow: inset 2px 2px 5px #C8D3E2, inset -2px -2px 5px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .neo-inset-deep {
+    background-color: #E6ECF4;
+    box-shadow: inset 6px 6px 12px #C2CDDD, inset -6px -6px 12px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  /* Interactive Buttons */
+  .neo-btn {
+    background-color: #EBF0F6;
+    color: #334155;
+    box-shadow: 5px 5px 10px #C8D3E2, -5px -5px 10px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .neo-btn:hover {
+    box-shadow: 3px 3px 6px #C8D3E2, -3px -3px 6px #FFFFFF;
+    transform: translateY(0.5px);
+  }
+  .neo-btn:active, .neo-btn.active {
+    box-shadow: inset 3px 3px 6px #C8D3E2, inset -3px -3px 6px #FFFFFF;
+    transform: translateY(1px);
+    color: #1E293B;
+  }
+
+  /* Colored Accent Neomorphic Buttons */
+  .neo-btn-primary {
+    background: linear-gradient(135deg, #4B8EF9 0%, #2563EB 100%);
+    color: #FFFFFF;
+    box-shadow: 5px 5px 12px rgba(37, 99, 235, 0.35), -5px -5px 12px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.2s ease;
+  }
+  .neo-btn-primary:hover {
+    box-shadow: 3px 3px 8px rgba(37, 99, 235, 0.4), -3px -3px 8px #FFFFFF;
+    transform: translateY(0.5px);
+  }
+  .neo-btn-primary:active {
+    background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
+    box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.35), inset -2px -2px 5px rgba(255, 255, 255, 0.2);
+    transform: translateY(1px);
+  }
+
+  .neo-btn-orange {
+    background: linear-gradient(135deg, #FB923C 0%, #EA580C 100%);
+    color: #FFFFFF;
+    box-shadow: 5px 5px 12px rgba(234, 88, 12, 0.35), -5px -5px 12px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  .neo-btn-red {
+    background: linear-gradient(135deg, #F87171 0%, #DC2626 100%);
+    color: #FFFFFF;
+    box-shadow: 5px 5px 12px rgba(220, 38, 38, 0.35), -5px -5px 12px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Neomorphic Pill Shape */
+  .neo-pill {
+    border-radius: 9999px;
+    background-color: #EBF0F6;
+    box-shadow: 4px 4px 9px #C8D3E2, -4px -4px 9px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .neo-pill-inset {
+    border-radius: 9999px;
+    background-color: #EBF0F6;
+    box-shadow: inset 3px 3px 6px #C8D3E2, inset -3px -3px 6px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Neomorphic Circular Buttons & Elements */
+  .neo-circle {
+    border-radius: 50%;
+    background-color: #EBF0F6;
+    box-shadow: 5px 5px 11px #C8D3E2, -5px -5px 11px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+  }
+
+  .neo-circle-inset {
+    border-radius: 50%;
+    background-color: #EBF0F6;
+    box-shadow: inset 4px 4px 8px #C8D3E2, inset -4px -4px 8px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+
+  /* Form Inputs */
+  .neo-input {
+    background-color: #EBF0F6;
+    color: #1E293B;
+    box-shadow: inset 3px 3px 7px #C8D3E2, inset -3px -3px 7px #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    transition: all 0.2s ease;
+  }
+  .neo-input:focus {
+    box-shadow: inset 4px 4px 9px #C2CDDD, inset -4px -4px 9px #FFFFFF;
+    outline: none;
+  }
+
+  /* Custom Scrollbar */
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
+    height: 6px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-transparent;
+    background: #EBF0F6;
+    box-shadow: inset 1px 1px 3px #C8D3E2, inset -1px -1px 3px #FFFFFF;
+    border-radius: 9999px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+    background: #C0CCD9;
+    border-radius: 9999px;
+    border: 1px solid #EBF0F6;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #A6B4C4;
   }
 }
 
@@ -123,11 +268,6 @@
     display: none !important;
   }
 
-  /* Reset layout classes for full width printing */
-  .md\:pl-64 {
-    padding-left: 0 !important;
-  }
-  
   .min-h-screen {
     min-height: auto !important;
   }
@@ -146,21 +286,17 @@
   }
 }
 
-/* Mobile & Tablet Cross-Platform Normalization (Apple/iOS vs Android) */
-
-/* Prevent iOS forced zoom on focus of form elements on mobile/tablet devices */
+/* Mobile & Touch Normalization */
 @media (max-width: 1024px) {
   input, select, textarea, [role="combobox"], [data-radix-select-trigger] {
     font-size: 16px !important;
   }
 }
 
-/* Standardize scrollbars and touch interaction */
 * {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Ensure smooth native momentum scrolling on iOS and Android */
 .custom-scrollbar, 
 [role="dialog"], 
 main,
@@ -168,7 +304,6 @@ aside {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Normalize date inputs on Safari (iOS) and Chrome (Android) */
 input[type="date"] {
   -webkit-appearance: none;
   appearance: none;
@@ -180,4 +315,3 @@ input[type="date"]::-webkit-date-and-time-value {
   min-height: 1.5em;
   margin: 0;
 }
-

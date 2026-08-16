@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Package, 
@@ -10,355 +10,451 @@ import {
   Wallet, 
   Clock, 
   Settings, 
-  Building2, 
   ArrowRight,
   Waves,
   Zap,
   CheckCircle2,
   Sparkles,
-  BarChart3,
-  Layers,
   ShieldCheck,
-  UserCheck
+  Check,
+  Building2,
+  Store,
+  Layers,
+  ChevronDown,
+  BarChart3,
+  Boxes,
+  Users
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocations } from '../contexts/LocationContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 export const Home: React.FC = () => {
-  const { profile, user } = useAuth();
-  const { selectedLocation } = useLocations();
+  const { profile, user, isAdmin, isManager } = useAuth();
+  const { selectedLocation, locations, selectedLocationId, setSelectedLocationId } = useLocations();
   const navigate = useNavigate();
 
+  const userRole = profile?.role || (isAdmin ? 'admin' : isManager ? 'manager' : 'staff');
+  const roleDisplay = userRole.toUpperCase();
+  const userName = profile?.name || user?.displayName || user?.email?.split('@')[0] || 'Vape Avenue';
   const activeLocationName = selectedLocation ? selectedLocation.name : 'All Store Locations';
 
-  const modules = [
+  // Bottom Shelf Module Definitions with exact color archetypes from the reference
+  const dockModules = [
     {
-      title: 'POS Register',
-      description: 'Fast barcode scanning, multi-payment checkout, and instant print receipt processing.',
-      icon: ShoppingCart,
+      id: 'pos',
+      name: 'POS Register',
+      shortName: 'POS Register',
       path: '/pos',
-      accentColor: 'from-emerald-500 to-teal-600',
-      badge: 'Active Workstation',
+      icon: ShoppingCart,
+      bgColor: 'bg-emerald-500',
+      shadowColor: 'shadow-emerald-500/30',
+      hasActiveDot: true,
       roles: ['admin', 'manager', 'staff']
     },
     {
-      title: 'Inventory Catalog',
-      description: 'Stock management, low stock warnings, barcode assignment, and pricing tiers.',
-      icon: Package,
+      id: 'inventory',
+      name: 'Inventory Catalog',
+      shortName: 'Inventory Cat...',
       path: '/inventory',
-      accentColor: 'from-[#1C2D4E] to-[#2B4570]',
+      icon: Package,
+      bgColor: 'bg-[#1E293B]',
+      shadowColor: 'shadow-slate-800/30',
       roles: ['admin', 'manager', 'staff']
     },
     {
-      title: 'Directory & Loyalty',
-      description: 'Customer profiles, VIP loyalty cards, supplier index, and staff roster.',
-      icon: BookOpen,
+      id: 'directory',
+      name: 'Directory & Loyalty',
+      shortName: 'Directory & L...',
       path: '/directory',
-      accentColor: 'from-purple-600 to-indigo-700',
+      icon: BookOpen,
+      bgColor: 'bg-purple-600',
+      shadowColor: 'shadow-purple-600/30',
       roles: ['admin', 'manager', 'staff']
     },
     {
-      title: 'Sales History',
-      description: 'Daily transaction records, refund manager, discounts log, and receipt reprints.',
-      icon: History,
+      id: 'sales',
+      name: 'Sales History',
+      shortName: 'Sales History',
       path: '/sales',
-      accentColor: 'from-amber-500 to-amber-700',
+      icon: History,
+      bgColor: 'bg-amber-500',
+      shadowColor: 'shadow-amber-500/30',
       roles: ['admin', 'manager', 'staff']
     },
     {
-      title: 'Financial Ledger',
-      description: 'Cash registers, store accounts, daily expense entries, and cash flow audit.',
-      icon: Wallet,
+      id: 'finance',
+      name: 'Financial Ledger',
+      shortName: 'Financial Led...',
       path: '/finance',
-      accentColor: 'from-blue-600 to-cyan-700',
+      icon: Wallet,
+      bgColor: 'bg-blue-600',
+      shadowColor: 'shadow-blue-600/30',
       roles: ['admin', 'manager', 'staff']
     },
     {
-      title: 'Timeclock & Schedule',
-      description: 'Staff shift schedules, daily timekeeping, and attendance reports.',
-      icon: Clock,
+      id: 'attendance',
+      name: 'Timeclock & Schedule',
+      shortName: 'Timeclock & ...',
       path: '/attendance',
-      accentColor: 'from-teal-600 to-emerald-700',
+      icon: Clock,
+      bgColor: 'bg-teal-600',
+      shadowColor: 'shadow-teal-600/30',
       roles: ['admin', 'manager', 'staff']
     },
     {
-      title: 'Executive Dashboard',
-      description: 'Store analytics, hourly revenue velocity, top sellers, and margin tracking.',
-      icon: LayoutDashboard,
+      id: 'dashboard',
+      name: 'Executive Dashboard',
+      shortName: 'Executive Da...',
       path: '/dashboard',
-      accentColor: 'from-rose-600 to-pink-700',
+      icon: LayoutDashboard,
+      bgColor: 'bg-rose-600',
+      shadowColor: 'shadow-rose-600/30',
       roles: ['admin']
     },
     {
-      title: 'Reports & Analytics',
-      description: 'Custom financial audits, stock valuations, and historical export tools.',
-      icon: TrendingUp,
+      id: 'reports',
+      name: 'Reports & Analytics',
+      shortName: 'Reports & An...',
       path: '/reports',
-      accentColor: 'from-orange-500 to-amber-600',
+      icon: TrendingUp,
+      bgColor: 'bg-orange-500',
+      shadowColor: 'shadow-orange-500/30',
       roles: ['admin']
     },
     {
-      title: 'System Settings',
-      description: 'Store locations, security roles, printer setup, and system configuration.',
-      icon: Settings,
+      id: 'settings',
+      name: 'System Settings',
+      shortName: 'System Setti...',
       path: '/settings',
-      accentColor: 'from-slate-700 to-slate-900',
+      icon: Settings,
+      bgColor: 'bg-[#1E293B]',
+      shadowColor: 'shadow-slate-800/30',
       roles: ['admin', 'manager', 'staff']
     }
   ];
 
-  const userRole = profile?.role || 'staff';
-  const availableModules = modules.filter(m => m.roles.includes(userRole));
+  const availableDockModules = dockModules.filter(m => 
+    m.roles.includes(userRole) || (isAdmin && m.roles.includes('admin')) || (isManager && m.roles.includes('manager'))
+  );
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-slate-100/80 p-3 sm:p-6 lg:p-10 overflow-hidden font-sans">
-      {/* Background Stylized Agos Shapes (Inspired by illustration background shapes in Agos Navy & Gold) */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#1C2D4E] rounded-full mix-blend-multiply opacity-25 filter blur-2xl pointer-events-none" />
-      <div className="absolute top-1/3 -right-20 w-80 h-80 bg-[#D4AF37] rounded-full mix-blend-multiply opacity-20 filter blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-28 left-1/4 w-[500px] h-[500px] bg-indigo-900/20 rounded-full filter blur-3xl pointer-events-none" />
-
-      {/* Elevated Hero Card Container */}
-      <div className="relative z-10 max-w-7xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#EBF0F6] p-3 sm:p-5 lg:p-8 flex flex-col items-center justify-start font-sans">
+      <div className="w-full max-w-7xl space-y-6 sm:space-y-8">
         
-        {/* Main Floating Landing Panel */}
-        <div className="bg-white rounded-[28px] sm:rounded-[36px] p-6 sm:p-10 lg:p-12 shadow-2xl border border-slate-200/90 relative overflow-hidden">
+        {/* ========================================================================= */}
+        {/* MAIN HERO APPLICATION CANVAS CONTAINER (MATCHING REFERENCE EXACTLY) */}
+        {/* ========================================================================= */}
+        <div className="w-full neo-flat-xl rounded-[32px] sm:rounded-[44px] p-5 sm:p-8 lg:p-12 relative overflow-hidden border border-white/90 shadow-[12px_12px_28px_#C8D3E2,-12px_-12px_28px_#FFFFFF]">
           
-          {/* Top Embedded Navbar inside Hero Card */}
-          <header className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-8 mb-8 border-b border-slate-100">
+          {/* TOP NAVIGATION BAR INSIDE CANVAS */}
+          <div className="flex flex-wrap items-center justify-between gap-4 pb-8 sm:pb-12 border-b border-slate-200/60">
+            
+            {/* Left: Brand Identity */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-[#1C2D4E] to-[#15233D] rounded-2xl flex items-center justify-center shadow-md shadow-[#1C2D4E]/20">
-                <Waves className="w-5 h-5 text-[#D4AF37]" />
+              <div className="size-11 sm:size-12 rounded-full bg-[#111827] neo-flat-sm flex items-center justify-center text-white shadow-md">
+                <Waves className="size-6 text-sky-400 stroke-[2.5]" />
               </div>
-              <div>
-                <span className="text-xl font-extrabold tracking-tight text-[#1C2D4E] font-heading">AGOS</span>
-                <span className="text-[10px] text-[#D4AF37] font-black tracking-widest uppercase ml-2 px-2 py-0.5 rounded-md bg-amber-50 border border-amber-200">
-                  Retail ERP
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-slate-900 font-heading">
+                  AGOS
+                </span>
+                <span className="px-2.5 py-0.5 rounded-full bg-amber-100/90 border border-amber-300 text-amber-700 text-[10px] font-extrabold tracking-wider uppercase neo-inset-sm">
+                  RETAIL ERP
                 </span>
               </div>
             </div>
 
-            {/* Quick Links inside Card Header */}
-            <nav className="hidden md:flex items-center gap-6 text-xs font-semibold text-slate-600">
-              <button onClick={() => navigate('/pos')} className="hover:text-[#1C2D4E] transition-colors">POS Register</button>
-              <button onClick={() => navigate('/inventory')} className="hover:text-[#1C2D4E] transition-colors">Inventory</button>
-              <button onClick={() => navigate('/sales')} className="hover:text-[#1C2D4E] transition-colors">Sales History</button>
-              <button onClick={() => navigate('/directory')} className="hover:text-[#1C2D4E] transition-colors">Directory</button>
-            </nav>
+            {/* Center Navigation Links (Desktop) */}
+            <div className="hidden md:flex items-center gap-6 lg:gap-8 text-xs sm:text-sm font-bold text-slate-600">
+              <Link 
+                to="/pos" 
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                POS Register
+              </Link>
+              <Link 
+                to="/inventory" 
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                Inventory
+              </Link>
+              <Link 
+                to="/sales" 
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                Sales History
+              </Link>
+              <Link 
+                to="/directory" 
+                className="hover:text-blue-600 transition-colors cursor-pointer"
+              >
+                Directory
+              </Link>
+            </div>
 
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-              <Badge variant="outline" className="hidden sm:flex items-center gap-1.5 px-3 py-1 bg-slate-50 text-slate-700 border-slate-200 text-xs font-medium">
-                <Building2 className="w-3.5 h-3.5 text-[#D4AF37]" />
-                {activeLocationName}
-              </Badge>
-              <Button 
+            {/* Right: Location Pill & Launch POS Action */}
+            <div className="flex items-center gap-3">
+              
+              {/* Store Location Selector Capsule */}
+              <div className="w-40 sm:w-48">
+                <Select 
+                  value={selectedLocationId} 
+                  onValueChange={setSelectedLocationId}
+                  disabled={!isAdmin && !isManager}
+                >
+                  <SelectTrigger className="w-full h-10 neo-flat-sm rounded-full text-xs font-bold text-slate-700 px-3.5 border border-white/80">
+                    <div className="flex items-center gap-2 truncate">
+                      <Store className="size-3.5 text-amber-600 shrink-0" />
+                      <SelectValue>
+                        {selectedLocationId === 'all' ? 'All Store Locations' : (locations.find(l => l.id === selectedLocationId)?.name || 'Select Location')}
+                      </SelectValue>
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="neo-flat-lg">
+                    {(isAdmin || isManager) && <SelectItem value="all">All Store Locations</SelectItem>}
+                    {locations.map(loc => (
+                      <SelectItem key={loc.id} value={loc.id}>{loc.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Dark Launch POS Action Button */}
+              <Button
+                variant="default"
                 onClick={() => navigate('/pos')}
-                className="bg-[#1C2D4E] hover:bg-[#15233D] text-[#D4AF37] font-bold rounded-full px-6 shadow-lg shadow-[#1C2D4E]/20 text-xs tracking-wide"
+                className="h-10 px-5 sm:px-6 rounded-full bg-[#111827] hover:bg-[#1f2937] text-white font-bold text-xs sm:text-sm shadow-md hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer"
               >
                 Launch POS
               </Button>
             </div>
-          </header>
+          </div>
 
-          {/* Hero Main Content Split */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* ========================================================================= */}
+          {/* HERO 2-COLUMN SECTION (MATCHING REFERENCE PRECISELY) */}
+          {/* ========================================================================= */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 pt-8 sm:pt-12 items-center">
             
-            {/* Left Column: Heading & Copy */}
-            <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-900 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
-                Store Operations Workstation
+            {/* LEFT COLUMN: HERO HEADLINE & ACTIONS */}
+            <div className="lg:col-span-6 space-y-6 sm:space-y-7">
+              
+              {/* Eyebrow Badge Pill */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full neo-flat-sm border border-blue-200/70 text-blue-700 text-xs font-extrabold shadow-xs">
+                <Sparkles className="size-3.5 text-blue-600" />
+                <span>Store Operations Workstation</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight leading-[1.15] font-heading">
-                Smart Retail & <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1C2D4E] via-indigo-900 to-[#D4AF37]">
-                  Inventory Management
-                </span>
-              </h1>
+              {/* Main Display Headline with Two-Tone Gradient/Accent Text */}
+              <div className="space-y-1">
+                <h1 className="text-3xl sm:text-5xl lg:text-5xl font-black tracking-tight text-[#0F172A] font-heading leading-[1.12]">
+                  Smart Retail &amp;<br />
+                  Inventory Manage<span className="text-amber-500 font-extrabold">ment</span>
+                </h1>
+              </div>
 
-              <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-lg">
-                Welcome back, <span className="font-bold text-slate-900">{profile?.name || user?.email?.split('@')[0]}</span>. Process checkouts, manage product stock, track sales history, and oversee cash registers from your Agos portal.
+              {/* Description Body Copy */}
+              <p className="text-sm sm:text-base text-slate-600 font-medium leading-relaxed max-w-lg">
+                Welcome back, <strong className="text-slate-900 font-bold">{userName}</strong>. Process checkouts, manage product stock, track sales history, and oversee cash registers from your Agos portal.
               </p>
 
-              {/* Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-2">
-                <Button 
+              {/* Hero Action Buttons */}
+              <div className="flex flex-wrap items-center gap-3.5 pt-1">
+                {/* Primary Button: Start POS Checkout */}
+                <button
+                  type="button"
                   onClick={() => navigate('/pos')}
-                  size="lg"
-                  className="bg-gradient-to-r from-[#1C2D4E] to-[#2B4570] text-white hover:opacity-95 font-bold rounded-2xl px-7 h-12 shadow-xl shadow-[#1C2D4E]/20 text-sm gap-2"
+                  className="h-12 px-6 rounded-full bg-[#1E293B] hover:bg-[#0F172A] text-white font-bold text-sm flex items-center gap-2.5 shadow-lg active:scale-[0.98] transition-all cursor-pointer border border-slate-700"
                 >
-                  <ShoppingCart className="w-4 h-4 text-[#D4AF37]" /> Start POS Checkout
-                </Button>
-                <Button 
+                  <ShoppingCart className="size-4 text-sky-400 stroke-[2.5]" />
+                  <span>Start POS Checkout</span>
+                </button>
+
+                {/* Secondary Button: Manage Stock */}
+                <button
+                  type="button"
                   onClick={() => navigate('/inventory')}
-                  variant="outline"
-                  size="lg"
-                  className="rounded-2xl px-6 h-12 border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50"
+                  className="h-12 px-6 rounded-full neo-flat text-slate-800 hover:text-slate-950 font-bold text-sm flex items-center gap-2.5 border border-white/90 shadow-md active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  <Package className="w-4 h-4 mr-2 text-slate-500" /> Manage Stock
-                </Button>
+                  <Package className="size-4 text-slate-600 stroke-[2.2]" />
+                  <span>Manage Stock</span>
+                </button>
               </div>
 
-              {/* Quick Status Tags */}
-              <div className="pt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-slate-500">
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Local-first store sync
+              {/* Trust & Status Badges */}
+              <div className="flex flex-wrap items-center gap-4 sm:gap-6 pt-3 text-xs sm:text-sm font-semibold text-slate-600">
+                <div className="flex items-center gap-2">
+                  <div className="size-4 rounded-full border border-emerald-500 flex items-center justify-center text-emerald-600">
+                    <Check className="size-3 stroke-[3]" />
+                  </div>
+                  <span>Local-first store sync</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-indigo-500" /> Role: <span className="capitalize font-bold text-slate-800">{userRole}</span>
+
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-blue-600 stroke-[2.2]" />
+                  <span>Role: <strong className="text-slate-800 font-bold">{roleDisplay}</strong></span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Agos Isometric Store Operations Illustration Stage */}
-            <div className="lg:col-span-6 relative">
-              <div className="relative w-full aspect-[4/3] rounded-3xl bg-gradient-to-tr from-slate-50 via-indigo-50/50 to-amber-50/30 p-6 border border-slate-100 flex items-center justify-center overflow-hidden shadow-inner">
+            {/* RIGHT COLUMN: INTERACTIVE OPERATIONS HUB */}
+            <div className="lg:col-span-6">
+              <div className="neo-flat-lg rounded-[32px] p-5 sm:p-7 border border-white/95 shadow-[10px_10px_24px_#C8D3E2,-10px_-10px_24px_#FFFFFF] relative overflow-hidden bg-gradient-to-br from-[#EEF4FB] to-[#E5EDF7]">
                 
-                {/* Decorative Glowing Rings on Graphic Stage */}
-                <div className="absolute w-64 h-64 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-[#D4AF37]/15 rounded-full blur-2xl pointer-events-none" />
+                {/* Hub Header Bar */}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="neo-flat-sm px-3.5 py-1.5 rounded-full border border-white flex items-center gap-2 text-xs font-extrabold text-slate-800 shadow-xs">
+                    <span className="size-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+                    <span>POS Terminal Active</span>
+                  </div>
 
-                {/* Isometric Product/POS Pedestals (Pure CSS & SVG Vector Stage) */}
-                <div className="relative z-10 w-full h-full flex flex-col justify-between p-2">
+                  <div className="px-3.5 py-1.5 rounded-full bg-[#111827] text-white text-[11px] font-black flex items-center gap-1.5 shadow-md">
+                    <BarChart3 className="size-3.5 text-sky-400" />
+                    <span>AGOS LIVE</span>
+                  </div>
+                </div>
+
+                {/* 3 Quick Action Station Cards (Image Reference) */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-5">
                   
-                  {/* Top Floating Badge */}
-                  <div className="flex justify-between items-center">
-                    <motion.div 
-                      initial={{ y: -10, opacity: 0 }}
-                      animate={{ y: 0, opacity: 1 }}
-                      className="bg-white/90 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-md border border-slate-200/80 flex items-center gap-2.5 text-xs font-bold text-slate-800"
-                    >
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <span>POS Terminal Active</span>
-                    </motion.div>
-
-                    <div className="bg-[#1C2D4E] text-[#D4AF37] px-3 py-1.5 rounded-xl shadow text-[11px] font-black tracking-wider uppercase flex items-center gap-1.5">
-                      <BarChart3 className="w-3.5 h-3.5" /> AGOS LIVE
+                  {/* Card 1: Checkout */}
+                  <div 
+                    onClick={() => navigate('/pos')}
+                    className="neo-flat rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer hover:scale-[1.03] transition-all border border-white/90 group"
+                  >
+                    <div className="size-12 rounded-full bg-emerald-500 flex items-center justify-center text-white mb-3 shadow-md shadow-emerald-500/20 group-hover:scale-110 transition-transform">
+                      <ShoppingCart className="size-5 stroke-[2.5]" />
                     </div>
+                    <h4 className="text-sm font-black text-slate-900 font-heading">
+                      Checkout
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-semibold mb-3">
+                      Barcode POS
+                    </p>
+                    <span className="px-3 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold neo-inset-sm">
+                      Ready
+                    </span>
                   </div>
 
-                  {/* Isometric Graphic Cards Grid */}
-                  <div className="grid grid-cols-3 gap-3 my-auto pt-2">
-                    
-                    {/* Pedestal 1: POS Checkout */}
-                    <motion.div 
-                      whileHover={{ y: -4 }}
-                      onClick={() => navigate('/pos')}
-                      className="cursor-pointer bg-gradient-to-b from-white to-emerald-50/60 p-3.5 rounded-2xl shadow-lg border border-emerald-100 flex flex-col items-center text-center space-y-2 group transition-all"
-                    >
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30 group-hover:scale-110 transition-transform">
-                        <ShoppingCart className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-extrabold text-slate-900">Checkout</p>
-                        <p className="text-[10px] text-slate-500 font-medium">Barcode POS</p>
-                      </div>
-                      <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                        Ready
-                      </span>
-                    </motion.div>
-
-                    {/* Pedestal 2: Stock Inventory */}
-                    <motion.div 
-                      whileHover={{ y: -4 }}
-                      onClick={() => navigate('/inventory')}
-                      className="cursor-pointer bg-gradient-to-b from-white to-indigo-50/60 p-3.5 rounded-2xl shadow-lg border border-indigo-100 flex flex-col items-center text-center space-y-2 group transition-all"
-                    >
-                      <div className="w-12 h-12 rounded-2xl bg-[#1C2D4E] text-[#D4AF37] flex items-center justify-center shadow-lg shadow-[#1C2D4E]/30 group-hover:scale-110 transition-transform">
-                        <Package className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-extrabold text-slate-900">Stock Items</p>
-                        <p className="text-[10px] text-slate-500 font-medium">Catalog Hub</p>
-                      </div>
-                      <span className="text-[9px] font-bold text-indigo-700 bg-indigo-100 px-2 py-0.5 rounded-full">
-                        Tracked
-                      </span>
-                    </motion.div>
-
-                    {/* Pedestal 3: Financial Accounts */}
-                    <motion.div 
-                      whileHover={{ y: -4 }}
-                      onClick={() => navigate('/finance')}
-                      className="cursor-pointer bg-gradient-to-b from-white to-amber-50/60 p-3.5 rounded-2xl shadow-lg border border-amber-100 flex flex-col items-center text-center space-y-2 group transition-all"
-                    >
-                      <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:scale-110 transition-transform">
-                        <Wallet className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-extrabold text-slate-900">Ledger</p>
-                        <p className="text-[10px] text-slate-500 font-medium">Cash Register</p>
-                      </div>
-                      <span className="text-[9px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-                        Audited
-                      </span>
-                    </motion.div>
-
+                  {/* Card 2: Stock Items */}
+                  <div 
+                    onClick={() => navigate('/inventory')}
+                    className="neo-flat rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer hover:scale-[1.03] transition-all border border-white/90 group"
+                  >
+                    <div className="size-12 rounded-full bg-[#1E293B] flex items-center justify-center text-amber-400 mb-3 shadow-md shadow-slate-900/20 group-hover:scale-110 transition-transform">
+                      <Package className="size-5 stroke-[2.5]" />
+                    </div>
+                    <h4 className="text-sm font-black text-slate-900 font-heading">
+                      Stock Items
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-semibold mb-3">
+                      Catalog Hub
+                    </p>
+                    <span className="px-3 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold neo-inset-sm">
+                      Tracked
+                    </span>
                   </div>
 
-                  {/* Bottom Floating Stats Strip */}
-                  <div className="bg-slate-900/90 text-white p-3 rounded-2xl backdrop-blur-md flex items-center justify-between text-xs border border-slate-800">
-                    <div className="flex items-center gap-2">
-                      <Layers className="w-4 h-4 text-[#D4AF37]" />
-                      <span className="font-medium text-slate-300">Operations Hub</span>
+                  {/* Card 3: Ledger */}
+                  <div 
+                    onClick={() => navigate('/finance')}
+                    className="neo-flat rounded-2xl p-4 flex flex-col items-center text-center cursor-pointer hover:scale-[1.03] transition-all border border-white/90 group"
+                  >
+                    <div className="size-12 rounded-full bg-amber-500 flex items-center justify-center text-white mb-3 shadow-md shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                      <Wallet className="size-5 stroke-[2.5]" />
                     </div>
-                    <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs">
-                      <span>Online & Synced</span>
-                    </div>
+                    <h4 className="text-sm font-black text-slate-900 font-heading">
+                      Ledger
+                    </h4>
+                    <p className="text-[11px] text-slate-500 font-semibold mb-3">
+                      Cash Register
+                    </p>
+                    <span className="px-3 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold neo-inset-sm">
+                      Audited
+                    </span>
                   </div>
 
                 </div>
+
+                {/* Bottom Hub Status Bar */}
+                <div className="h-11 rounded-2xl bg-[#1E293B] px-4 flex items-center justify-between text-xs font-bold text-white shadow-inner">
+                  <div className="flex items-center gap-2">
+                    <Layers className="size-4 text-amber-400" />
+                    <span className="text-slate-200">Operations Hub</span>
+                  </div>
+                  <span className="text-emerald-400 font-extrabold text-[11px]">
+                    Online &amp; Synced
+                  </span>
+                </div>
+
               </div>
             </div>
 
           </div>
+
         </div>
 
-        {/* Operational Modules Horizontal Icon Strip */}
+        {/* ========================================================================= */}
+        {/* BOTTOM SECTION: STORE MODULES & SERVICES DOCK TRAY (MATCHING IMAGE) */}
+        {/* ========================================================================= */}
         <div className="space-y-3 pt-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div>
-              <h2 className="text-lg font-extrabold text-slate-900 font-heading tracking-tight">
-                Store Modules & Services
-              </h2>
-              <p className="text-xs text-slate-500">
-                Authorized tools for <span className="font-bold text-[#1C2D4E] uppercase">{userRole}</span> account
-              </p>
-            </div>
+          
+          {/* Section Header */}
+          <div className="px-2">
+            <h2 className="text-lg sm:text-xl font-extrabold font-heading text-slate-900">
+              Store Modules &amp; Services
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Authorized tools for <strong className="text-slate-800 font-bold uppercase">{roleDisplay}</strong> account
+            </p>
           </div>
 
-          <div className="bg-white/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-start lg:justify-center gap-3 sm:gap-6 overflow-x-auto custom-scrollbar">
-            {availableModules.map((mod) => {
-              const Icon = mod.icon;
-              return (
-                <button
-                  key={mod.path}
-                  onClick={() => navigate(mod.path)}
-                  title={`${mod.title} - ${mod.description}`}
-                  className="group flex flex-col items-center gap-2 shrink-0 p-1.5 sm:p-2 rounded-2xl hover:bg-slate-100/80 transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#1C2D4E]/20"
-                >
-                  <div className={cn(
-                    "w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br",
-                    mod.accentColor,
-                    "text-white flex items-center justify-center shadow-md shadow-slate-200 group-hover:scale-110 group-hover:shadow-lg transition-all duration-200 relative"
-                  )}>
-                    <Icon className="w-6 h-6 sm:w-7 sm:h-7" />
-                    {mod.badge && (
-                      <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full" title={mod.badge} />
-                    )}
-                  </div>
-                  <span className="text-[11px] font-bold text-slate-700 group-hover:text-[#1C2D4E] transition-colors max-w-[84px] text-center truncate">
-                    {mod.title}
-                  </span>
-                </button>
-              );
-            })}
+          {/* Wide Raised Neomorphic Dock Container */}
+          <div className="w-full neo-flat-lg rounded-[28px] sm:rounded-[36px] p-4 sm:p-6 lg:p-7 border border-white/90 shadow-[8px_8px_20px_#C8D3E2,-8px_-8px_20px_#FFFFFF] overflow-x-auto custom-scrollbar">
+            
+            <div className="flex items-center justify-between min-w-[760px] gap-2 lg:gap-4 px-2">
+              {availableDockModules.map((item, index) => {
+                const Icon = item.icon;
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    onClick={() => navigate(item.path)}
+                    className="flex flex-col items-center gap-2 cursor-pointer group flex-1"
+                  >
+                    {/* Circle Icon Badge */}
+                    <div className="relative">
+                      <div className={cn(
+                        "size-13 sm:size-14 rounded-full flex items-center justify-center text-white transition-all duration-200 shadow-md group-hover:scale-110 group-active:scale-95 group-hover:shadow-lg",
+                        item.bgColor,
+                        item.shadowColor
+                      )}>
+                        <Icon className="size-6 sm:size-6.5 stroke-[2.2]" />
+                      </div>
+
+                      {/* Small Active Dot Badge (for POS Register) */}
+                      {item.hasActiveDot && (
+                        <div className="size-3.5 rounded-full bg-emerald-400 border-2 border-white absolute -top-0.5 -right-0.5 shadow-xs" />
+                      )}
+                    </div>
+
+                    {/* Short Module Label */}
+                    <span className="text-[11px] sm:text-xs font-extrabold text-slate-700 text-center tracking-tight group-hover:text-blue-600 transition-colors whitespace-nowrap">
+                      {item.shortName}
+                    </span>
+                  </motion.div>
+                );
+              })}
+            </div>
+
           </div>
+
         </div>
 
       </div>
