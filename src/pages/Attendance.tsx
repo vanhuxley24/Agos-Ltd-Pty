@@ -52,6 +52,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { DataTablePagination } from '@/components/DataTablePagination';
+import { DateRangeQueryGuardrail } from '@/components/DateRangeQueryGuardrail';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLocations } from '@/contexts/LocationContext';
 import { useSettings } from '@/contexts/SettingsContext';
@@ -1507,79 +1508,79 @@ export const Attendance: React.FC = () => {
                 Clock in when starting shift, clock out when finished.
               </CardDescription>
             </CardHeader>
-            <CardContent className="relative z-10 flex flex-col items-center py-6">
+            <CardContent className="relative z-10 flex flex-col items-center py-5">
               <div className={cn(
-                "w-24 h-24 rounded-full flex items-center justify-center mb-8 shadow-xl animate-pulse ring-8",
+                "w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-lg ring-4",
                 currentUserAttendance && !currentUserAttendance.timeOut 
-                  ? "bg-white/10 ring-white/5 text-white" 
+                  ? "bg-white/10 ring-white/10 text-white" 
                   : "bg-primary/5 ring-primary/5 text-primary"
               )}>
-                <Clock className="w-10 h-10" />
+                <Clock className="w-8 h-8" />
               </div>
 
               {!currentUserAttendance ? (
-                <div className="w-full space-y-4">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="w-full space-y-3">
+                  <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
                       <MapPin className="w-4 h-4 text-primary/40" />
                       <div>
                         <p className="text-[10px] font-bold text-primary/40 uppercase">Location</p>
-                        <p className="text-sm font-bold text-primary">
+                        <p className="text-xs font-bold text-primary">
                           {selectedLocationId === 'all' ? 'Select location first' : locations.find(l => l.id === selectedLocationId)?.name}
                         </p>
                       </div>
                     </div>
                   </div>
                   <Button 
-                    className="w-full h-16 text-lg font-black bg-[#1A2B4B] hover:bg-[#2C3E50] text-white rounded-2xl shadow-lg shadow-[#1A2B4B]/10 transition-all active:scale-95 group"
+                    className="w-full h-12 text-sm font-black bg-[#1A2B4B] hover:bg-[#2C3E50] text-white rounded-xl shadow-md shadow-[#1A2B4B]/10 transition-all active:scale-95 group"
                     onClick={handleTimeIn}
                     disabled={selectedLocationId === 'all'}
                   >
-                    <LogIn className="w-6 h-6 mr-3 group-hover:translate-x-1 transition-transform" />
+                    <LogIn className="w-4 h-4 mr-2 group-hover:translate-x-1 transition-transform" />
                     TIME IN
                   </Button>
                 </div>
               ) : !currentUserAttendance.timeOut ? (
-                <div className="w-full space-y-6">
-                  <div className="space-y-2 text-center text-white">
-                    <p className="text-sm font-bold opacity-60 uppercase tracking-widest">Shift Started</p>
-                    <p className="text-3xl font-black">
+                <div className="w-full space-y-4">
+                  <div className="space-y-1 text-center text-white">
+                    <p className="text-xs font-bold opacity-60 uppercase tracking-widest">Shift Started</p>
+                    <p className="text-2xl font-black">
                       {formatSafeTime(currentUserAttendance.timeIn, currentUserAttendance.timeInBackup)}
                     </p>
-                    <div className="flex items-center justify-center gap-2 text-xs font-medium opacity-80">
+                    <div className="flex items-center justify-center gap-1.5 text-xs font-medium opacity-80">
                       <MapPin className="w-3 h-3" />
                       {currentUserAttendance.locationName}
                     </div>
                   </div>
                   <Button 
                     variant="outline"
-                    className="w-full h-16 text-lg font-black bg-white hover:bg-slate-50 text-rose-600 border-none rounded-2xl shadow-xl shadow-black/20 transition-all active:scale-95 group"
+                    className="w-full h-12 text-sm font-black bg-white hover:bg-slate-50 text-rose-600 border-none rounded-xl shadow-md transition-all active:scale-95 group"
                     onClick={handleTimeOut}
                   >
-                    <LogOut className="w-6 h-6 mr-3 group-hover:-translate-x-1 transition-transform" />
+                    <LogOut className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                     TIME OUT
                   </Button>
                 </div>
               ) : (
-                <div className="w-full text-center space-y-4">
-                  <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 mb-2">
-                    <CheckCircle2 className="w-8 h-8" />
+                <div className="w-full text-center space-y-3">
+                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600 mb-1">
+                    <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-lg font-black text-primary">Shift Completed</p>
-                    <p className="text-sm text-muted-foreground">You are clocked out for today.</p>
+                  <div className="space-y-0.5">
+                    <p className="text-base font-black text-primary">Shift Completed</p>
+                    <p className="text-xs text-muted-foreground">You are clocked out for today.</p>
                   </div>
-                  <div className="flex items-center justify-center gap-6 pt-4">
+                  <div className="flex items-center justify-center gap-5 pt-2">
                     <div className="text-center">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">In</p>
-                      <p className="text-sm font-bold text-primary">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">In</p>
+                      <p className="text-xs font-bold text-primary">
                         {formatSafeTime(currentUserAttendance.timeIn, currentUserAttendance.timeInBackup)}
                       </p>
                     </div>
-                    <div className="w-px h-8 bg-slate-100" />
+                    <div className="w-px h-6 bg-slate-100" />
                     <div className="text-center">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Out</p>
-                      <p className="text-sm font-bold text-primary">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">Out</p>
+                      <p className="text-xs font-bold text-primary">
                         {formatSafeTime(currentUserAttendance.timeOut, currentUserAttendance.timeOutBackup)}
                       </p>
                     </div>
@@ -1636,27 +1637,27 @@ export const Attendance: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-xl bg-white/50 backdrop-blur-sm overflow-hidden mt-6">
-            <CardHeader className="bg-primary/5 border-b border-primary/5 pb-3">
-              <CardTitle className="text-sm font-bold flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary/40" />
+          <Card className="border-none shadow-xl bg-white/50 backdrop-blur-sm overflow-hidden mt-5">
+            <CardHeader className="bg-primary/5 border-b border-primary/5 pb-2.5 pt-3.5 px-4">
+              <CardTitle className="text-xs font-bold flex items-center gap-2">
+                <Calendar className="w-3.5 h-3.5 text-primary/40" />
                 Upcoming Team Calendar
               </CardTitle>
               <CardDescription className="text-[10px]">
-                Weekly schedule & leave indicator of all team members. Hover indicator for details.
+                Weekly schedule & leave indicator of all team members.
               </CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-100 bg-slate-50/30">
-                      <th className="pl-4 pr-2 py-2.5 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[90px]">Staff</th>
+                    <tr className="border-b border-slate-100 bg-slate-50/40">
+                      <th className="pl-3 pr-1 py-2 text-[9px] font-black text-slate-400 uppercase tracking-widest min-w-[75px]">Staff</th>
                       {upcomingDates.map((date, idx) => (
-                        <th key={idx} className="px-1 py-2.5 text-center min-w-[42px]">
-                          <p className="text-[9px] font-bold text-slate-400 uppercase">{format(date, 'EEE').substring(0, 2)}</p>
+                        <th key={idx} className="px-0.5 py-1.5 text-center min-w-[34px]">
+                          <p className="text-[8px] font-bold text-slate-400 uppercase">{format(date, 'EEE').substring(0, 2)}</p>
                           <p className={cn(
-                            "text-xs font-black",
+                            "text-[11px] font-black",
                             isToday(date) ? "text-indigo-600 font-extrabold" : "text-slate-700"
                           )}>{format(date, 'd')}</p>
                         </th>
@@ -1666,18 +1667,18 @@ export const Attendance: React.FC = () => {
                   <tbody className="divide-y divide-slate-50">
                     {allUsers.map((user) => (
                       <tr key={user.id} className="hover:bg-slate-50/40">
-                        <td className="pl-4 pr-2 py-2 text-xs font-bold text-slate-700 max-w-[100px] truncate">
+                        <td className="pl-3 pr-1 py-1.5 text-[11px] font-bold text-slate-700 max-w-[85px] truncate">
                           {user.name || user.email?.split('@')[0] || user.id}
                         </td>
                         {upcomingDates.map((date, idx) => {
                           const status = getUserScheduleStatusForDate(user.id, date);
                           return (
-                            <td key={idx} className="px-1 py-2 text-center align-middle">
+                            <td key={idx} className="px-0.5 py-1.5 text-center align-middle">
                               <div className="flex justify-center">
                                 {/* The indicator trigger */}
                                 <div 
                                   className={cn(
-                                    "w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black border transition-all cursor-help shadow-sm",
+                                    "w-6 h-6 rounded-md flex items-center justify-center text-[9px] font-black border transition-all cursor-help shadow-xs",
                                     status.colorClass
                                   )}
                                   onMouseEnter={(e) => {
@@ -1955,36 +1956,26 @@ export const Attendance: React.FC = () => {
 
             <TabsContent value="report">
               <div className="space-y-6">
-                <Card className="border-none shadow-sm bg-gradient-to-r from-[#1A2B4B] to-[#2C3E50] text-white border-b-2 border-[#D4AF37]/30">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                      <div>
-                        <h3 className="text-lg font-black italic tracking-wide">Attendance Reports</h3>
-                        <p className="text-white/80 text-sm font-medium">Summary of staff hours, tardiness, and absences.</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-white/60 uppercase font-bold">Start Date</Label>
-                          <Input 
-                            type="date" 
-                            className="bg-white/10 border-white/20 text-white h-9 text-xs"
-                            value={reportStartDate}
-                            onChange={(e) => setReportStartDate(e.target.value)}
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-white/60 uppercase font-bold">End Date</Label>
-                          <Input 
-                            type="date" 
-                            className="bg-white/10 border-white/20 text-white h-9 text-xs"
-                            value={reportEndDate}
-                            onChange={(e) => setReportEndDate(e.target.value)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <DateRangeQueryGuardrail
+                  title="Attendance Reports Guardrail"
+                  description="Specify a date range to summarize staff hours, tardiness, and absences with read cost estimation."
+                  collectionName="attendance"
+                  dateField="date"
+                  dateFieldType="string"
+                  startDate={reportStartDate}
+                  endDate={reportEndDate}
+                  onStartDateChange={setReportStartDate}
+                  onEndDateChange={setReportEndDate}
+                  activeLoadedRange={{ startDate: reportStartDate, endDate: reportEndDate }}
+                  loadedCount={allLogs.filter(l => l.date >= reportStartDate && l.date <= reportEndDate).length}
+                  isCurrentlyLoaded={(s, e) => s >= reportStartDate && e <= reportEndDate}
+                  onApplyQuery={(start, end, count) => {
+                    setReportStartDate(start);
+                    setReportEndDate(end);
+                    toast.success(`Applied report date range: ${start} to ${end}. Found ${count} attendance log(s).`);
+                  }}
+                  isCustomRangeActive={true}
+                />
 
                 <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-xl">
                   <table className="w-full text-left border-collapse">
@@ -2332,18 +2323,37 @@ export const Attendance: React.FC = () => {
 
             <TabsContent value="compare">
               <div className="space-y-4">
+                <DateRangeQueryGuardrail
+                  title="Daily Comparison Query Guardrail"
+                  description="Specify the comparison date to audit scheduled vs actual attendance hours."
+                  collectionName="attendance"
+                  dateField="date"
+                  dateFieldType="string"
+                  startDate={compareDateFilter}
+                  endDate={compareDateFilter}
+                  onStartDateChange={(newStart) => setCompareDateFilter(newStart)}
+                  onEndDateChange={(newEnd) => setCompareDateFilter(newEnd)}
+                  activeLoadedRange={{ startDate: compareDateFilter, endDate: compareDateFilter }}
+                  loadedCount={allLogs.filter(l => l.date === compareDateFilter).length}
+                  isCurrentlyLoaded={(s, e) => s === compareDateFilter && e === compareDateFilter}
+                  onApplyQuery={(start, end, count) => {
+                    setCompareDateFilter(start);
+                    toast.success(`Comparing scheduled vs actual records for ${start}. Found ${count} attendance log(s).`);
+                  }}
+                  isCustomRangeActive={true}
+                />
+
                 <Card className="border-none shadow-xl overflow-hidden rounded-3xl">
-                  <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-3.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div>
-                        <CardTitle className="text-lg font-bold">Daily Comparison Report</CardTitle>
-                        <CardDescription>
-                          Comparing scheduled vs actual attendance for {compareDateFilter ? formatSafeDate(compareDateFilter, 'MMMM dd, yyyy') : 'selected date'}.
+                        <CardTitle className="text-base font-bold">Staff Filter & Inspection</CardTitle>
+                        <CardDescription className="text-xs">
+                          Evaluating scheduled vs actual for {compareDateFilter ? formatSafeDate(compareDateFilter, 'MMMM dd, yyyy') : 'selected date'}.
                         </CardDescription>
                       </div>
-                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                        {/* User Select */}
-                        <div className="w-56 sm:w-60">
+                      <div className="flex items-center gap-3">
+                        <div className="w-56 sm:w-64">
                           <Select value={compareUserFilter} onValueChange={setCompareUserFilter}>
                             <SelectTrigger className="w-full h-9 text-xs bg-white border-slate-200/80 rounded-xl focus:ring-1 focus:ring-[#1A2B4B]">
                               <SelectValue placeholder="All Staff & Managers" />
@@ -2357,33 +2367,6 @@ export const Attendance: React.FC = () => {
                               ))}
                             </SelectContent>
                           </Select>
-                        </div>
-
-                        {/* Date Filter Input */}
-                        <div className="flex items-center gap-2 bg-white border border-slate-200/80 rounded-xl px-3 py-1 shadow-sm">
-                          <Calendar className="w-4 h-4 text-[#1A2B4B] shrink-0" />
-                          <Input
-                            type="date"
-                            value={compareDateFilter}
-                            onChange={(e) => setCompareDateFilter(e.target.value)}
-                            className="h-7 text-xs border-none p-0 focus-visible:ring-0 w-32 font-bold text-slate-700 bg-transparent"
-                          />
-                        </div>
-
-                        <div className="flex items-center gap-2 justify-end">
-                          <Button
-                            variant={compareDateFilter === format(new Date(), 'yyyy-MM-dd') ? "default" : "outline"}
-                            size="sm"
-                            className={cn(
-                              "h-8 text-xs font-bold rounded-xl",
-                              compareDateFilter === format(new Date(), 'yyyy-MM-dd') 
-                                ? "bg-[#1A2B4B] text-white" 
-                                : "bg-white text-slate-600 border-slate-200 hover:bg-slate-50"
-                            )}
-                            onClick={() => setCompareDateFilter(format(new Date(), 'yyyy-MM-dd'))}
-                          >
-                            Today
-                          </Button>
                         </div>
                       </div>
                     </div>
@@ -2542,56 +2525,55 @@ export const Attendance: React.FC = () => {
                   `}</style>
 
                 {/* Configuration controls card */}
-                <Card className="border-none shadow-xl overflow-hidden rounded-3xl no-print">
-                  <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                      <div>
-                        <CardTitle className="text-lg font-bold">Staff Payslips Manager</CardTitle>
-                        <CardDescription>Generate, adjust, and download payslips based on schedule and attendance.</CardDescription>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-slate-400 uppercase font-bold">Staff Member</Label>
+                <div className="space-y-4 no-print">
+                  <DateRangeQueryGuardrail
+                    title="Payslip Date Range & Query Guardrail"
+                    description="Select the payroll evaluation window to calculate total hours, overtime, tardiness, and net pay."
+                    collectionName="attendance"
+                    dateField="date"
+                    dateFieldType="string"
+                    startDate={payslipStartDate}
+                    endDate={payslipEndDate}
+                    onStartDateChange={setPayslipStartDate}
+                    onEndDateChange={setPayslipEndDate}
+                    activeLoadedRange={{ startDate: payslipStartDate, endDate: payslipEndDate }}
+                    loadedCount={allLogs.filter(l => l.date >= payslipStartDate && l.date <= payslipEndDate).length}
+                    isCurrentlyLoaded={(s, e) => s >= payslipStartDate && e <= payslipEndDate}
+                    onApplyQuery={(start, end, count) => {
+                      setPayslipStartDate(start);
+                      setPayslipEndDate(end);
+                      toast.success(`Applied payslip period: ${start} to ${end}. Loaded ${count} attendance log(s).`);
+                    }}
+                    isCustomRangeActive={true}
+                  />
+
+                  <Card className="border-none shadow-xl overflow-hidden rounded-3xl">
+                    <CardHeader className="bg-slate-50/50 border-b border-slate-100 py-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <CardTitle className="text-base font-bold">Staff Member Selection</CardTitle>
+                          <CardDescription className="text-xs">Choose the employee whose payslip you want to review or export.</CardDescription>
+                        </div>
+                        <div className="w-full sm:w-72">
                           <Select value={selectedPayslipUser} onValueChange={setSelectedPayslipUser}>
-                            <SelectTrigger className="w-full h-9 text-xs bg-white border-slate-200">
-                              <SelectValue placeholder="Select Staff...">
+                            <SelectTrigger className="w-full h-10 text-xs bg-white border-slate-200 shadow-xs">
+                              <SelectValue placeholder="Select Staff Member...">
                                 {selectedPayslipUser ? (staffAndManagers.find(u => u.id === selectedPayslipUser)?.name || staffAndManagers.find(u => u.id === selectedPayslipUser)?.email || selectedPayslipUser) : undefined}
                               </SelectValue>
                             </SelectTrigger>
                             <SelectContent>
                               {staffAndManagers.map(u => (
                                 <SelectItem key={u.id} value={u.id}>
-                                  {u.name || u.email || u.id}
+                                  {u.name || u.email || u.id} ({u.role === 'manager' ? 'Manager' : 'Staff'})
                                 </SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
                         </div>
-                        
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-slate-400 uppercase font-bold">Start Date</Label>
-                          <Input 
-                            type="date" 
-                            className="bg-white border-slate-200 h-9 text-xs"
-                            value={payslipStartDate}
-                            onChange={(e) => setPayslipStartDate(e.target.value)}
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <Label className="text-[10px] text-slate-400 uppercase font-bold">End Date</Label>
-                          <Input 
-                            type="date" 
-                            className="bg-white border-slate-200 h-9 text-xs"
-                            value={payslipEndDate}
-                            onChange={(e) => setPayslipEndDate(e.target.value)}
-                          />
-                        </div>
                       </div>
-                    </div>
-                  </CardHeader>
-                </Card>
+                    </CardHeader>
+                  </Card>
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                   {/* Left Side: Manipulation controls (Rates, Incentives, Deductions) */}

@@ -84,6 +84,7 @@ import { Separator } from '@/components/ui/separator';
 import { ReturnForm } from '@/components/ReturnForm';
 
 import { exportToCSV } from '@/lib/export';
+import { DateRangeQueryGuardrail } from '@/components/DateRangeQueryGuardrail';
 
 export const SalesHistory: React.FC = () => {
   const { user, profile, isAdmin, isManager } = useAuth();
@@ -1362,6 +1363,28 @@ export const SalesHistory: React.FC = () => {
           Export CSV
         </Button>
       </div>
+
+      {/* On-Demand Date Range Guardrail for Sales History & Ledgers */}
+      <DateRangeQueryGuardrail 
+        title="Sales & Ledger Query Guardrail"
+        description="Verify target date boundaries and count records to manage read costs before analyzing past transaction receipts and ledgers."
+        collectionName="sales"
+        dateField="timestamp"
+        startDate={dateRange.start || format(new Date(), 'yyyy-MM-dd')}
+        endDate={dateRange.end || format(new Date(), 'yyyy-MM-dd')}
+        onStartDateChange={(val) => setDateRange(prev => ({ ...prev, start: val }))}
+        onEndDateChange={(val) => setDateRange(prev => ({ ...prev, end: val }))}
+        onApplyQuery={(s, e, count) => {
+          setDateRange({ start: s, end: e });
+          toast.success(`Sales history filter applied for ${s} to ${e} (${count} verified records).`);
+        }}
+        onResetQuery={() => {
+          setDateRange(getTodayDateRange());
+          toast.info('Reset sales history date range to Today.');
+        }}
+        loadedCount={filteredSales.length}
+        activeLoadedRange={{ startDate: dateRange.start || format(new Date(), 'yyyy-MM-dd'), endDate: dateRange.end || format(new Date(), 'yyyy-MM-dd') }}
+      />
 
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <div className="relative flex-1 w-full">

@@ -147,6 +147,19 @@ The Agos codebase compiles through a clean modular structure, with a clear separ
 * **The Backup Mechanism:** Clicking `Export JSON Backup` serializes each database document across all standard collections (e.g., products, sales, customers, directories, audit logs) into a single, structured backup JSON. It serializes complex datatypes (such as Firestore's Timestamp) safely into structured properties.
 * **The Restore Process:** Select a local JSON file, opt for either **Merge & Update (Safe)** or **Pure Overwrite (Clean Replace)**, input the string confirmation `RESTORE`, and launch. The interface utilizes atomic Firestore batches of up to 400 entries per pipeline to ensure consistent restores.
 
+#### 5. Multi-Item Branch Stock Transfers (`/src/components/StockTransferForm.tsx`)
+* **Enterprise Logistics Architecture:** Allows dispatching multiple inventory line items between store locations in a single transactional batch.
+* **Dynamic Stock Level Validation:** Live inventory checkers calculate remaining source quantities, preventing stock deficits and out-of-bounds transfers.
+* **Atomic Batch Commits:** Uses `writeBatch()` to deduct source branch quantities, increment destination branch quantities, log transfer details in `stockTransfers`, and record individual entries in `auditLogs` simultaneously.
+
+#### 6. On-Demand Serverless Read Guardrail (`/src/components/DateRangeQueryGuardrail.tsx`)
+* **Read Quota Safeguard:** Protects serverless database quotas by preventing unintended continuous real-time queries across extensive historical datasets.
+* **Lightweight Count Pre-Estimation:** Calls Firestore's `getCountFromServer()` aggregation metadata API to evaluate exact document count before downloading full record sets.
+* **Active Status Banner:** Provides clear UI feedback detailing currently applied range, verified document volume, estimated read usage, and instant reset switches.
+
+#### 7. Wide Modal Form System
+* **Expansive Layout Standards:** Standardized dialog wrappers across all operations (`PurchaseOrderForm`, `StockTransferForm`, `StockAdjustmentForm`, `ProductForm`, `ReturnForm`) using `sm:max-w-3xl lg:max-w-4xl`, `rounded-3xl` corners, and spacious padding to eliminate horizontal/vertical scrolling lag.
+
 ---
 
 ### Edge Cases & Error Handling
@@ -204,22 +217,43 @@ The system will initialize a local dev server, accessible directly at `http://lo
 
 To maintain a clean tracking records index without altering the core operational scopes of the system, this section details subsequent incremental updates, features, and patches released to production.
 
-#### Patch v1.1: Flexible POS View Modes & Grouped Hierarchy
-*   **Feature Integration:** Implemented toggleable register layouts in the Point-of-Sale (POS) interface (`/src/pages/POS.tsx`), adding interactive **List Mode** and **Grid Mode** selectors.
-*   **Aesthetic Organization:** In List Mode, products are hierarchically grouped by **Category** and **Brand** out-of-the-box. This delivers structured catalog visibility, high-speed cash register workflows, and cleaner lists under heavy inventory counts.
-*   **Add Qty Multiplier:** Added high-performance quantity increment/decrement blocks directly next to the search filter, enabling rapid bulk entry.
+#### Patch v2.1: On-Demand Guardrail Queries & Serverless Quota Shields
+*   **Universal Query Guardrail Engine:** Integrated `DateRangeQueryGuardrail` across Dashboard, Reports, Sales History, and Attendance modules to eliminate unintentional broad cloud queries.
+*   **Server Count Pre-Estimation:** Executes lightweight `getCountFromServer()` metadata checks to inspect exact document volume and calculate expected read consumption before executing range queries.
+*   **Active Loaded Range Verification:** Provides visual badge feedback, manual apply switches, and reset fallbacks to safeguard serverless database billing.
 
-#### Patch v1.2: Branch-Level Inventory Permissions & Isolation
-*   **Security Isolation:** Programmed strict location boundaries in the Inventory panel (`/src/pages/Inventory.tsx`). Non-administrative Staff (Cashiers) are strictly isolated to view only the stock counts associated with their assigned branch/location.
-*   **Global Distribution Map:** Secured the multi-branch global stock grid, keeping it visible exclusively to authorized Admin accounts to deter unauthorized distribution leaks.
+#### Patch v2.0: Multi-Item Branch Stock Transfers & Wide Form Standardization
+*   **Multi-Item Stock Transfers:** Transformed Branch Stock Transfers into a multi-item logistics interface with dynamic stock checkers and atomic batch commits.
+*   **Wide Dialog Form Architecture:** Re-engineered all system modals (`PurchaseOrderForm`, `StockTransferForm`, `StockAdjustmentForm`, `ProductForm`, `ReturnForm`) with spacious `lg:max-w-4xl` layouts to remove scroll clipping.
+*   **Audit Trail Expansion:** Every multi-item stock transfer automatically dispatches granular balance tracking to the immutable audit log.
+
+#### Patch v1.9: POS Customer Autocomplete, Staff Directory Access & Management Authorization
+*   **POS Customer Autocomplete Search:** Replaced static customer dropdowns with dynamic search autocomplete supporting name/phone/email filtering and barcode loyalty cards.
+*   **Staff Directory Access:** Granted Staff role users access to Directory for viewing and registering Customers and Loyalty Cards.
+*   **Manager Void Approvals:** Enabled Managers alongside Administrators to void sales, returns, and purchase orders.
+
+#### Patch v1.8: Customer Search & Default Selection Rework
+*   **Customer Name Search in Sales History:** Enabled customer filtering across Sales, Returns, and Pending Payments.
+*   **Finance Cash Account Alignment:** Linked default cash filtering directly to configured cash accounts.
+*   **Saturday–Friday Weekly Cycle:** Aligned weekly reporting cycles to Saturday–Friday periods.
+
+#### Patch v1.7: Editable Checkout, Range Schedules, & Admin Controls
+*   **Editable Checkout Totals & Approvals:** Allowed staff to override transaction totals with manager approval workflows.
+*   **Date Ranges on Schedules:** Enabled start/end date ranges with auto-plotting in staff scheduling.
+*   **Admin-Restricted Expense Deletion:** Protected expense records with automatic balance refunds on deletion.
 
 #### Patch v1.3: Employee Performance & Shift Analytics
-*   **Interactive Analytics Dashboard:** Implemented a new, premium "Employee Performance" dashboard view inside the central reporting module (`/src/pages/Dashboard.tsx`) giving authorized managers comprehensive visual insights into employee sales activity and shift attendance.
-*   **Active Subscriptions Pipeline:** Established real-time onSnapshot data streaming with Firebase Firestore for both the `users` and `attendance` collections, ensuring calculations on regular hours, overtime, and register orders stay actively synchronized.
-*   **Multi-Tier KPI Leaderboards:** Created visual winner cards summarizing four essential retail KPI winners: Top Sales Volume (units), Top Revenue Generator (monetary sales), Most Hours Worked (attendance shifts), and Sales Efficiency (average units sold per logged hour).
-*   **Toggleable Recharts bar charts:** Engineered an interactive Recharts bar comparison chart with customizable data toggle selection allowing operators to visually map and analyze team productivity (Net Units Sold, Hours Worked, Revenue, and Units/Hour) at a glance.
-*   **Staff Ledger Grid with Multi-Device Compatibility:** Built a detailed Staff Performance Ledger table enabling real-time name searches, user-role filter selects, desktop-aligned table rows, and responsive, fluid mobile card stacks.
-*   **Register Shrinkage and Return Audits:** Coded real-time tracking of individual cashier return frequencies and calculated a **Returns Accuracy Rate** to help administrators track customer satisfaction, measure accuracy, and prevent internal shrinkage.
+*   **Interactive Analytics Dashboard:** Implemented "Employee Performance" dashboard view in `/src/pages/Dashboard.tsx`.
+*   **Multi-Tier KPI Leaderboards:** Created visual winner cards for Top Sales Volume, Top Revenue, Most Hours Worked, and Sales Efficiency.
+*   **Staff Ledger Grid:** Responsive data tables with search and role filters.
+
+#### Patch v1.2: Branch-Level Inventory Permissions & Isolation
+*   **Security Isolation:** Enforced localized stock visibility for non-administrative profiles.
+*   **Global Distribution Map:** Restricted global multi-branch stock grids to Administrators.
+
+#### Patch v1.1: Flexible POS View Modes & Grouped Hierarchy
+*   **Feature Integration:** Implemented List and Grid mode selectors with Category/Brand grouping in `/src/pages/POS.tsx`.
+*   **Add Qty Multiplier:** Added quantity controls directly to search bars for rapid bulk register entry.
 
 ---
 

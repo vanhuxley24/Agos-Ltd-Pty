@@ -41,6 +41,7 @@ import { useLocations } from '@/contexts/LocationContext';
 import { supabaseService } from '@/lib/supabase-service';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
+import { DateRangeQueryGuardrail } from '@/components/DateRangeQueryGuardrail';
 import { 
   Table, 
   TableBody, 

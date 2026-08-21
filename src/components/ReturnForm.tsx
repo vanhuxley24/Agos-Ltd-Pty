@@ -283,14 +283,14 @@ export const ReturnForm: React.FC<ReturnFormProps> = ({ isOpen, onClose, sale, p
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+      <DialogContent className="sm:max-w-3xl lg:max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl p-6">
+        <DialogHeader className="pb-3 border-b border-slate-100">
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold text-slate-900">
             <Undo2 className="w-5 h-5 text-[#D4AF37]" />
-            Return or Replacement
+            Process Return or Replacement
           </DialogTitle>
-          <DialogDescription>
-            Sale #{sale.id.slice(-6)} • {new Date(sale.timestamp.toDate()).toLocaleDateString()}
+          <DialogDescription className="text-xs text-slate-500">
+            Sale #{sale.id.slice(-6)} • Transaction Date: {new Date(sale.timestamp.toDate()).toLocaleDateString()}
           </DialogDescription>
         </DialogHeader>
 

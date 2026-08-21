@@ -222,8 +222,10 @@ export const supabaseService = {
       };
       const { data, error } = await supabase.from('audit_logs').insert([payload]);
       if (error) {
-        // Silently catch or warn if RLS policy restricts anonymous audit logs
-        console.warn('Supabase logAudit notice (RLS):', error.message || error);
+        // Silently catch RLS error 42501 when anonymous or unauthenticated against Supabase table
+        if (error.code !== '42501') {
+          console.warn('Supabase logAudit notice:', error.message || error);
+        }
       }
       return data;
     } catch (e) {

@@ -168,75 +168,77 @@ export const StockAdjustmentForm: React.FC<StockAdjustmentFormProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Stock Adjustment</DialogTitle>
-          <DialogDescription>
-            Manually update stock levels for a specific product and location.
+      <DialogContent className="sm:max-w-2xl lg:max-w-3xl max-h-[92vh] overflow-y-auto rounded-3xl p-6">
+        <DialogHeader className="pb-3 border-b border-slate-100">
+          <DialogTitle className="text-xl font-bold text-slate-900">Stock Adjustment</DialogTitle>
+          <DialogDescription className="text-xs text-slate-500">
+            Manually update stock levels for a specific product and location with audit trail tracking.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label>Product</Label>
-            <div className="flex gap-1.5">
-              <div className="flex-1">
-                <Select 
-                  value={watchProductId} 
-                  onValueChange={(val) => setValue('productId', val)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-600">Product</Label>
+              <div className="flex gap-1.5">
+                <div className="flex-1">
+                  <Select 
+                    value={watchProductId} 
+                    onValueChange={(val) => setValue('productId', val)}
+                  >
+                    <SelectTrigger className="rounded-xl border-slate-200">
+                      <SelectValue placeholder="Select product">
+                        {products.find(p => p.id === watchProductId) ? `${products.find(p => p.id === watchProductId)?.name} (${products.find(p => p.id === watchProductId)?.sku})` : 'Select product'}
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent className="max-h-60">
+                      {products.map(p => (
+                        <SelectItem key={p.id} value={p.id}>{p.name} ({p.sku})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  className="border-indigo-200 hover:bg-indigo-50 rounded-xl flex-shrink-0"
+                  onClick={() => setIsScannerOpen(true)}
+                  title="Scan Product Barcode"
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select product">
-                      {products.find(p => p.id === watchProductId) ? `${products.find(p => p.id === watchProductId)?.name} (${products.find(p => p.id === watchProductId)?.sku})` : 'Select product'}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {products.map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name} ({p.sku})</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  <Scan className="w-4 h-4 text-indigo-600" />
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                className="border-[#D4AF37] hover:bg-[#D4AF37]/10 flex-shrink-0"
-                onClick={() => setIsScannerOpen(true)}
-                title="Scan Product Barcode"
-              >
-                <Scan className="w-4 h-4 text-[#D4AF37]" />
-              </Button>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label>Location</Label>
-            <Select 
-              value={watchLocationId} 
-              onValueChange={(val) => setValue('locationId', val)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select location">
-                  {locations.find(l => l.id === watchLocationId)?.name || 'Select location'}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {locations.map(l => (
-                  <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-600">Location</Label>
+              <Select 
+                value={watchLocationId} 
+                onValueChange={(val) => setValue('locationId', val)}
+              >
+                <SelectTrigger className="rounded-xl border-slate-200">
+                  <SelectValue placeholder="Select location">
+                    {locations.find(l => l.id === watchLocationId)?.name || 'Select location'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {locations.map(l => (
+                    <SelectItem key={l.id} value={l.id}>{l.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {watchProductId && watchLocationId && (
-            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 flex justify-between items-center">
-              <span className="text-sm text-slate-500">Current Stock at Location:</span>
-              <span className="font-bold text-slate-900">{currentStockAtLocation}</span>
+            <div className="bg-indigo-50/70 p-3.5 rounded-2xl border border-indigo-100 flex justify-between items-center text-xs">
+              <span className="font-semibold text-slate-600">Current Stock at Selected Location:</span>
+              <span className="font-black text-indigo-700 text-sm">{currentStockAtLocation} units</span>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Adjustment Type</Label>
               <Select 

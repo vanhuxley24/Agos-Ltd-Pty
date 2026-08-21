@@ -23,7 +23,6 @@ import {
   ArrowRight,
   BarChart3,
   CheckCircle2,
-  Terminal,
   ShieldCheck,
   Search,
   Filter,
@@ -44,6 +43,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { toast } from 'sonner';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
@@ -89,6 +89,7 @@ import {
   subYears
 } from 'date-fns';
 import { motion } from 'motion/react';
+import { DateRangeQueryGuardrail } from '@/components/DateRangeQueryGuardrail';
 import { 
   Select, 
   SelectContent, 
@@ -873,6 +874,38 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* On-Demand Date Range Guardrail */}
+      <DateRangeQueryGuardrail 
+        title="Dashboard Analytics Query Guardrail"
+        description="Verify date intervals and calculate serverless read counts before querying historical sales trends and KPIs."
+        collectionName="sales"
+        dateField="timestamp"
+        startDate={customStartDate}
+        endDate={customEndDate}
+        onStartDateChange={(val) => {
+          setCustomStartDate(val);
+          setTimeRange('custom');
+        }}
+        onEndDateChange={(val) => {
+          setCustomEndDate(val);
+          setTimeRange('custom');
+        }}
+        onApplyQuery={(s, e, count) => {
+          setCustomStartDate(s);
+          setCustomEndDate(e);
+          setTimeRange('custom');
+          toast.success(`Dashboard analytics loaded for ${s} to ${e} (${count} verified records).`);
+        }}
+        onResetQuery={() => {
+          setTimeRange('7days');
+          setCustomStartDate(format(subDays(new Date(), 7), 'yyyy-MM-dd'));
+          setCustomEndDate(format(new Date(), 'yyyy-MM-dd'));
+          toast.info('Reset dashboard to standard 7-day view.');
+        }}
+        loadedCount={filteredSales.length}
+        activeLoadedRange={{ startDate: format(activeDateRange.start, 'yyyy-MM-dd'), endDate: format(activeDateRange.end, 'yyyy-MM-dd') }}
+      />
+
       {activeDashboardTab === 'overview' ? (
         <div className="space-y-5 animate-in fade-in duration-300">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -1194,7 +1227,7 @@ export const Dashboard: React.FC = () => {
             <CardHeader className="pb-3 shrink-0">
               <div className="flex items-center justify-between gap-2">
                 <CardTitle className="text-lg font-heading text-[#1A2B4B] flex items-center gap-2">
-                  <Terminal className="w-4 h-4 text-[#D4AF37]" />
+                  <ShieldCheck className="w-4 h-4 text-[#D4AF37]" />
                   System Patch Notes
                 </CardTitle>
                 <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-emerald-200 text-[8px] uppercase font-bold tracking-wider py-0.5 shrink-0">
@@ -1218,11 +1251,37 @@ export const Dashboard: React.FC = () => {
                 </p>
               </div>
 
-              {/* Patch 1.9 */}
+              {/* Patch 2.1 */}
               <div className="space-y-1.5 border-l-2 border-[#D4AF37] pl-3 py-0.5">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-[11px] font-bold text-[#1A2B4B]">Patch v1.9: POS Customer Autocomplete, Staff Directory Access & Management Authorization</h4>
+                  <h4 className="text-[11px] font-bold text-[#1A2B4B]">Patch v2.1: On-Demand Guardrail Queries & Read Quota Safeguards</h4>
                   <span className="text-[8px] font-mono text-[#D4AF37] bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded font-bold animate-pulse">Latest</span>
+                </div>
+                <ul className="text-[10px] text-slate-600 list-disc list-inside space-y-1 leading-relaxed">
+                  <li><strong>On-Demand Serverless Read Guardrail:</strong> Deployed a universal query guardrail engine (<span className="font-mono text-indigo-700">DateRangeQueryGuardrail</span>) across Dashboard, Reports, Sales History, and Attendance modules.</li>
+                  <li><strong>Server Count Pre-Estimation:</strong> Utilizes lightweight <span className="font-mono text-indigo-700">getCountFromServer()</span> aggregation queries to verify the exact document volume and calculate estimated read consumption before fetching historical datasets.</li>
+                  <li><strong>Active Range Verification:</strong> Clear badge indicators and explicit Apply/Reset controls prevent unintended continuous reads and safeguard Firebase serverless quotas.</li>
+                </ul>
+              </div>
+
+              {/* Patch 2.0 */}
+              <div className="space-y-1.5 border-l-2 border-slate-300 pl-3 py-0.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[11px] font-bold text-[#1A2B4B]">Patch v2.0: Multi-Item Branch Stock Transfers & Wide Form Standardization</h4>
+                  <span className="text-[8px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-bold">Stable</span>
+                </div>
+                <ul className="text-[10px] text-slate-600 list-disc list-inside space-y-1 leading-relaxed">
+                  <li><strong>Multi-Item Stock Transfers:</strong> Revamped Branch Stock Transfers allowing multiple inventory items to be transferred in a single unified operation with item-by-item quantity validations and atomic Firestore batches.</li>
+                  <li><strong>Wide Modal Form System:</strong> Standardized dialog dimensions across all operations (<span className="font-mono text-indigo-700">PurchaseOrderForm</span>, <span className="font-mono text-indigo-700">StockTransferForm</span>, <span className="font-mono text-indigo-700">StockAdjustmentForm</span>, <span className="font-mono text-indigo-700">ProductForm</span>, <span className="font-mono text-indigo-700">ReturnForm</span>) to an expansive, readable layout without unnecessary horizontal or vertical scroll clipping.</li>
+                  <li><strong>Comprehensive Audit Trail:</strong> Every transferred line item records atomic historical stock changes, source deduction, destination increment, and structured logging in the immutable audit log.</li>
+                </ul>
+              </div>
+
+              {/* Patch 1.9 */}
+              <div className="space-y-1.5 border-l-2 border-slate-300 pl-3 py-0.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-[11px] font-bold text-[#1A2B4B]">Patch v1.9: POS Customer Autocomplete, Staff Directory Access & Management Authorization</h4>
+                  <span className="text-[8px] font-mono text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded font-bold">Stable</span>
                 </div>
                 <ul className="text-[10px] text-slate-600 list-disc list-inside space-y-1 leading-relaxed">
                   <li><strong>POS Customer Autocomplete Search:</strong> Replaced the customer dropdown with an interactive search input featuring real-time suggestions, name/phone/email filtering, and hardware/barcode loyalty card scanning (defaults to Walk-In Customer).</li>

@@ -201,9 +201,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] md:min-h-[600px] max-h-[95vh] overflow-y-auto flex flex-col">
-        <DialogHeader>
-          <DialogTitle>{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
+      <DialogContent className="sm:max-w-3xl lg:max-w-4xl max-h-[92vh] overflow-y-auto rounded-3xl p-6 flex flex-col">
+        <DialogHeader className="pb-2 border-b border-slate-100">
+          <DialogTitle className="text-xl font-bold text-slate-900">{product ? 'Edit Product' : 'Add New Product'}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 flex flex-col">
           <Tabs defaultValue="general" className="w-full flex-1 flex flex-col">

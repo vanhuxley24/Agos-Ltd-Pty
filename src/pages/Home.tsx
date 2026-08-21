@@ -309,7 +309,7 @@ export const Home: React.FC = () => {
                 <div className="flex items-center justify-between mb-5">
                   <div className="neo-flat-sm px-3.5 py-1.5 rounded-md border border-white flex items-center gap-2 text-xs sm:text-sm font-extrabold text-slate-800 shadow-xs">
                     <span className="size-2.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
-                    <span>POS Terminal Active</span>
+                    <span>POS Register Active</span>
                   </div>
 
                   <div className="px-3.5 py-1.5 rounded-md bg-[#111827] text-white text-xs font-black flex items-center gap-1.5 shadow-md">

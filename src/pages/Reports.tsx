@@ -27,6 +27,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { handleFirestoreError, OperationType } from '@/lib/firestore-utils';
+import { DateRangeQueryGuardrail } from '@/components/DateRangeQueryGuardrail';
 import { 
   Select, 
   SelectContent, 
@@ -796,6 +797,38 @@ export const Reports: React.FC = () => {
           </Button>
         </div>
       </div>
+
+      {/* On-Demand Date Range Guardrail */}
+      <DateRangeQueryGuardrail 
+        title="Reports Query Guardrail"
+        description="Verify date ranges and calculate serverless read counts before loading extensive historical report matrices."
+        collectionName="sales"
+        dateField="timestamp"
+        startDate={customStartDate}
+        endDate={customEndDate}
+        onStartDateChange={(val) => {
+          setCustomStartDate(val);
+          setDateRange('custom');
+        }}
+        onEndDateChange={(val) => {
+          setCustomEndDate(val);
+          setDateRange('custom');
+        }}
+        onApplyQuery={(s, e, count) => {
+          setCustomStartDate(s);
+          setCustomEndDate(e);
+          setDateRange('custom');
+          toast.success(`Loaded reports dataset for ${s} to ${e} (${count} verified records).`);
+        }}
+        onResetQuery={() => {
+          setDateRange('month');
+          setCustomStartDate(format(startOfMonth(new Date()), 'yyyy-MM-dd'));
+          setCustomEndDate(format(endOfMonth(new Date()), 'yyyy-MM-dd'));
+          toast.info('Reset reports query to default period (This Month).');
+        }}
+        loadedCount={filteredSales.length}
+        activeLoadedRange={{ startDate: format(start, 'yyyy-MM-dd'), endDate: format(end, 'yyyy-MM-dd') }}
+      />
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-sm border-slate-200/60 overflow-hidden">

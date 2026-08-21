@@ -27,7 +27,8 @@
 | **Phase 2: Advanced Location-bound Inventory**<br>• Location-level inventory distribution<br>• Restricted staff-level view rules (Admin-only distribution visibility) | Milestone 2 | Fixed Price | ₱5,000.00 |
 | **Phase 3: Point of Sale (POS) Registry & Layouts**<br>• Standard Grid view implementation<br>• Default Category & Brand hierarchically grouped list-view<br>• Multi-tier customer pricing engines & 12% VAT calculations | Milestone 3 | Fixed Price | ₱8,000.00 |
 | **Phase 4: Finance Hub & Immutable Audit Logs**<br>• Expense registers, ledger trackers, and performance charts<br>• Immutable actions-logger audit pipeline for security | Milestone 4 | Fixed Price | ₱5,000.00 |
-| **Phase 5: Cloud Deployment & Knowledge Handover**<br>• Vite build pipeline optimizations, custom metadata<br>• System documentation updates ready for client signature | Milestone 5 | Fixed Price | ₱3,000.00 |
+| **Phase 5: Multi-Item Logistics & Wide Form Architecture**<br>• Multi-line item branch stock transfers with batch writes<br>• Standardized wide modal layouts across all operational forms | Milestone 5 | Included | ₱0.00 |
+| **Phase 6: Serverless Query Guardrail Engine & Deployment**<br>• On-demand read quota shields and pre-estimation calculations<br>• Vite build pipeline optimizations, custom metadata & docs | Milestone 6 | Fixed Price | ₱3,000.00 |
 
 ---
 
